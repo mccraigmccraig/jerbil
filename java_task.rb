@@ -3,13 +3,14 @@ require 'rake/tasklib'
 
 module Rake
   class JavaTask < TaskLib
-    
-      
+         
      # Name for task
      attr_accessor :name
   
      # Class to run
      attr_accessor :classname
+     
+     attr_accessor :description
      
      # program args
      attr_accessor :parameters
@@ -31,15 +32,14 @@ module Rake
      attr_accessor :debug_port
      
      attr_accessor :verbose
-     attr_accessor :description
      
      attr_accessor :dependencies
      
      attr_accessor :fork
      
-     def initialize(classname)
+     def initialize(name, classname)
+        @name = name || classname
         @classname = classname
-        @name = classname
         @parameters = []
         @classpath = "."
         @yourkit_args = ["-agentlib:yjpagent=port=10001"]
@@ -51,14 +51,13 @@ module Rake
         @verbose = false
         @fork = false
         @vmargs = []
-        @description = "run #{classname}"
         @dependencies = [ :compile ]
         yield self if block_given?
         define
      end
      
      def define
-        desc description
+        desc description unless description.nil?
         task name => dependencies do |t|
        
         if classpath.respond_to?(:to_cp)

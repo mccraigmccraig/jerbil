@@ -4,7 +4,6 @@ require File.dirname(__FILE__) + '/java_helper'
 
 module Rake
   module TestNG
-  
     class TestNGTask < TaskLib
       attr_accessor :name
       attr_accessor :description
@@ -20,17 +19,13 @@ module Rake
       end
       
       def define
-        desc description
+        desc description unless description.nil?
         task name => dependencies do |t|
           tl = Rake::TestNG::TestListener.new
           listener = Rjb::bind(tl, 'org.testng.ITestListener')
           testng = Rjb::import('org.testng.TestNG').new_with_sig 'Z', false
           testng.addListener(listener)    
-          testklasses = []
-          testclasses.each do |clazz|
-            testklasses << Rjb::import(clazz) 
-          end
-     
+          testklasses = testclasses.map { |clazz| Rjb::import(clazz) }    
           testng.setTestClasses( testklasses )
           testng.setOutputDirectory( "test-output" )
           #testng.setParallel(true)

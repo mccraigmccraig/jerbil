@@ -1,3 +1,6 @@
+
+require 'rjb'
+
 # for some really weird reasons schemaexport fails on mac os x
 # if java is not running in debug mode
 $JAVA_DEBUG = RUBY_PLATFORM =~ /darwin/i || false
@@ -38,7 +41,7 @@ module JavaHelper
     $VERBOSE = true
 
     jvmargs = []    
-    jvmargs <<  "-Djava.util.logging.config.file=#{loggingprops.to_s}" unless loggingprops.nil? 
+    jvmargs << "-Djava.util.logging.config.file=#{loggingprops.to_s}" unless loggingprops.nil? 
 
     if $JAVA_DEBUG
       jvmargs += [
@@ -85,8 +88,6 @@ class JavaFileList < Rake::FileList
   def to_classfiles
     self.pathmap("%{^#{srcdir},#{dstdir}}X.class")
   end
-  
-  
   
   def resources
     r = FileList.new
