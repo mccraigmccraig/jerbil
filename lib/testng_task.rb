@@ -9,11 +9,13 @@ module Rake
       attr_accessor :description
       attr_accessor :dependencies
       attr_accessor :testclasses
+      attr_accessor :outputdir
       
       def initialize(name)
         @name = name
         @dependencies = []
         @testclasses = []
+        @outputdir = "test-output"
         yield self if block_given?
         define
       end
@@ -27,7 +29,7 @@ module Rake
           testng.addListener(listener)    
           testklasses = testclasses.map { |clazz| Rjb::import(clazz) }.to_a   
           testng.setTestClasses( testklasses )
-          testng.setOutputDirectory( "test-output" )
+          testng.setOutputDirectory( outputdir )
           #testng.setParallel(true)
           testng.setVerbose( 2 )
           testng.run
