@@ -1,5 +1,6 @@
 
 require 'rjb'
+require 'rake'
 
 # for some really weird reasons schemaexport fails on mac os x
 # if java is not running in debug mode
@@ -74,7 +75,7 @@ class JavaFileList < Rake::FileList
   attr_accessor :resource_patterns
   
   def initialize(srcdir, dstdir)
-    super()
+    super([])
     @srcdir = srcdir
     @dstdir = dstdir
     @resource_patterns = [ "/**/*.xml", "/**/*.yml", "/**/*.rb", "/**/*.txt" ]
@@ -82,7 +83,7 @@ class JavaFileList < Rake::FileList
   end
   
   def to_classes
-   to_classfiles.pathmap("%{^#{srcdir}/,}X").sub("/", ".")
+	self.pathmap("%{^#{srcdir}/,}X").gsub("/", ".")
   end
   
   def to_classfiles
