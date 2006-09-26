@@ -25,7 +25,7 @@ module Rake
           listener = Rjb::bind(tl, 'org.testng.ITestListener')
           testng = Rjb::import('org.testng.TestNG').new_with_sig 'Z', false
           testng.addListener(listener)    
-          testklasses = testclasses.map { |clazz| Rjb::import(clazz) }    
+          testklasses = testclasses.map { |clazz| Rjb::import(clazz) }.to_a   
           testng.setTestClasses( testklasses )
           testng.setOutputDirectory( "test-output" )
           #testng.setParallel(true)
