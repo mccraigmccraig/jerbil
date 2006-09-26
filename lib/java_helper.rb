@@ -6,7 +6,6 @@ require 'rake'
 # if java is not running in debug mode
 $JAVA_DEBUG = RUBY_PLATFORM =~ /darwin/i || false
 
-
 module JavaHelper
   def printStream_to_s(&block)
     yieldIO('java.io.PrintStream', block)
@@ -40,7 +39,9 @@ module JavaHelper
   def load_vm(classpath, loggingprops = nil )
     #need verbose java exceptions
     $VERBOSE = true
-
+    #include build jars
+    classpath.include(File.join(File.dirname(__FILE__), "../buildsupport/*.jar"))
+   
     jvmargs = []    
     jvmargs << "-Djava.util.logging.config.file=#{loggingprops.to_s}" unless loggingprops.nil? 
 
@@ -52,7 +53,7 @@ module JavaHelper
     end
 
     begin
-      Rjb::load(classpath, jvmargs)
+      Rjb::load(classpath.to_cp, jvmargs)
     rescue 
 	    $stderr << "could not load java vm: make sure JAVA_HOME is set correctly!\n"
       raise
@@ -83,7 +84,7 @@ class JavaFileList < Rake::FileList
   end
   
   def to_classes
-	self.pathmap("%{^#{srcdir}/,}X").gsub("/", ".")
+	  self.pathmap("%{^#{srcdir}/,}X").gsub("/", ".")
   end
   
   def to_classfiles
