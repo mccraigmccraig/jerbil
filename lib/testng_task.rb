@@ -10,12 +10,14 @@ module Rake
       attr_accessor :dependencies
       attr_accessor :testclasses
       attr_accessor :outputdir
+      attr_accessor :report
       
       def initialize(name)
         @name = name
         @dependencies = []
         @testclasses = []
         @outputdir = "test-output"
+        @report = true
         yield self if block_given?
         define
       end
@@ -26,7 +28,11 @@ module Rake
           tl = Rake::TestNG::TestListener.new
           listener = Rjb::bind(tl, 'org.testng.ITestListener')
           testng = Rjb::import('org.testng.TestNG').new_with_sig 'Z', false
-          testng.addListener(listener)    
+          testng.addListener(listener)
+          if report
+            testng.addListener(Rjb::import('org.testng.reporters.SuiteHTMLReporter').new)
+            testng.addListener(Rjb::import('org.testng.reporters.TestHTMLReporter').new)
+          end
           testklasses = testclasses.map { |clazz| Rjb::import(clazz) }.to_a   
           testng.setTestClasses( testklasses )
           testng.setOutputDirectory( outputdir )
