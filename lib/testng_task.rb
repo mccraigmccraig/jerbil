@@ -8,7 +8,6 @@ module Rake
       include JavaHelper
       
       attr_accessor :name
-      attr_accessor :description
       attr_accessor :dependencies
       attr_accessor :testclasses
       attr_accessor :outputdir
@@ -31,14 +30,16 @@ module Rake
       end
       
       def define
-        directory workingdir unless workingdir.nil?
-        directory outputdir
-        desc description unless description.nil?
+	  	desc "run testng tests" if Rake.application.last_comment.nil?
         task name => dependencies do |t|
-          tl = Rake::TestNG::TestListener.new
-          listener = Rjb::bind(tl, 'org.testng.ITestListener')
           testng = Rjb::import('org.testng.TestNG').new_with_sig 'Z', false
-          testng.addListener(listener)
+         
+          tl = Rake::TestNG::TestListener.new
+          sl = Rake::TestNG::SuiteListener.new
+          
+          testng.addListener(Rjb::bind(tl, 'org.testng.ITestListener'))
+          testng.addListener(Rjb::bind(sl, 'org.testng.ISuiteListener'))
+          
           if report
             testng.addListener(Rjb::import('org.testng.reporters.SuiteHTMLReporter').new)
             testng.addListener(Rjb::import('org.testng.reporters.TestHTMLReporter').new)
@@ -52,7 +53,7 @@ module Rake
           
           testng.setOutputDirectory( outputdir )
           #testng.setParallel(true)
-          testng.setVerbose( 2 )
+          testng.setVerbose( 1 )
           
           if workingdir.nil?
             testng.run
@@ -62,6 +63,8 @@ module Rake
       
           raise "some tests failed: #{tl.failed_to_s}" unless testng.getStatus == 0
         end
+        directory workingdir unless workingdir.nil?
+        directory outputdir
       end
     end
     
@@ -74,13 +77,11 @@ module Rake
         end
         
         def onFinish(context)
-          puts
           @outfile.close
         end
         
         def onStart(context)
-          file = File.join(context.getOutputDirectory, "testng.output")
-          $stderr.puts "test logging going to #{file}"
+          file = File.join(context.getOutputDirectory, "#{context.getName}.output")
           @outfile = File.open( file , "w") 
         end
         
@@ -88,7 +89,7 @@ module Rake
         end
         
         def onTestFailure(result)
-          print "X"
+          $stderr.print "X"
           
           @failed_classes.add result.getTestClass.getName
           begin
@@ -109,7 +110,7 @@ module Rake
         end
         
         def onTestSuccess(result)
-          print "."
+          $stderr.print "."
         end
         
         def log(s)
@@ -118,6 +119,49 @@ module Rake
         
         def failed_to_s
           @failed_classes.to_a.join(', ')   
+        end
+      end
+      
+      class SuiteListener
+        def onStart(suite)
+          #@start = Time.new
+        end
+        
+        def onFinish(suite)
+          puts
+          #puts "tests finished in #{@start-Time.new} secs"
+        end
+      end
+    
+    
+      class << self
+        def create_suite_xml(filename, classnames, suitename="default", onetest=false)
+          File.open(filename, 'w') do |suitexml|
+            xml = Builder::XmlMarkup.new(:target=>suitexml, :indent=>4)
+            xml.instruct!
+            xml.declare! :DOCTYPE, :suite, :SYSTEM, "http://testng.org/testng-1.0.dtd" 
+            
+            xml.suite(:name => suitename ) do      
+            
+              if onetest
+                xml.test(:name=>"all") do
+                  xml.classes do
+                    classnames.sort.each do | klass |
+                      xml.tag!("class", :name => klass ) 
+                    end
+                  end
+                end
+              else
+                classnames.sort.each do | klass |
+                    xml.test(:name => klass[klass.rindex('.')+1, klass.length]) do
+                      xml.classes do
+                        xml.tag!("class", :name => klass ) 
+                    end
+                  end              
+                end
+              end
+            end
+          end
         end
       end
     end

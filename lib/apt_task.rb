@@ -16,8 +16,10 @@ module Rake
     attr_accessor :nocompile
     
     def initialize(name)
-      @annotations = []
+      @annotations = {}
       @nocompile = false
+      @found_annotations = {}
+      @found_annotations_handler = {}
       super
     end
     
@@ -41,12 +43,8 @@ module Rake
       123456
     end 
     
-    def process
-      specTypeDecls = @env.getSpecifiedTypeDeclarations 
-  
-      add_each(specTypeDecls)
-
-      specTypeDecls.each do |specType|
+    def process  
+      add_each(@env.getSpecifiedTypeDeclarations).each do |specType|
         begin
           check_type(specType)
         rescue
@@ -62,12 +60,22 @@ module Rake
           handler.call(type)
         elsif type.is_classdecl?  
           methods = type.getMethods
-          add_each(methods)
-          methods.each do |m|
+          add_each(methods).each do |m|
             check_type(m)
           end      
         end
       end
+    end
+    
+    def find_annotation(annotation, options={}, &handler)
+      defopts = { :scope => :class }
+      defopts.merge! options
+      annotations[annotation] = Proc.new { |spec|
+           t = spec.getDeclaringType || spec
+           @found_annotations[annotation] ||= []
+           @found_annotations[annotation] << t.toString
+      }
+      @found_annotations_handler[annotation] = handler
     end
     
     
@@ -75,12 +83,21 @@ module Rake
     def compile(parameters, printwriter)
       apt = Rjb::import('com.sun.tools.apt.Main')
       parameters << "-nocompile" if nocompile
-      apt.process(get_empty_factory, printwriter, parameters )
+      apt.process(get_processor_factory, printwriter, parameters )
     end
     
-    def get_empty_factory
+    def post_compile
+      super
+      @found_annotations.each do |name, types|
+        handler = @found_annotations_handler[name]        
+        handler.call(types) unless handler.nil?
+      end
+    end
+    
+    def get_processor_factory
        Rjb::bind(self, 'com.sun.mirror.apt.AnnotationProcessorFactory')
     end
+    
     
     private 
     def enhance_type(a_type)
@@ -89,13 +106,7 @@ module Rake
             getAnnotation(Rjb::import(annotation)) != nil  
           end
       }
-      
-      is_entity = %q{
-          def is_entity?
-            has_annotation?('javax.persistence.Entity')
-          end
-      }
-      
+       
       get_annotation = %q{
           def get_annotation(annotation)
               getAnnotation(Rjb::import(annotation)) 
@@ -109,10 +120,8 @@ module Rake
       }
      
       a_type.instance_eval(has_annotation)
-      a_type.instance_eval(is_entity)  
       a_type.instance_eval(get_annotation)
-      a_type.instance_eval(is_classdecl)
-      
+      a_type.instance_eval(is_classdecl)    
     end
     
     def add_each(obj)
@@ -125,6 +134,7 @@ module Rake
           end
         }
         obj.instance_eval(each_method)
+        obj
     end
   end
 end

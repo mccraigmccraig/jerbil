@@ -8,7 +8,6 @@ module Rake
     
     attr_accessor :name
     attr_accessor :java_files
-    attr_accessor :description
     attr_accessor :dependencies
 
     def initialize(name)
@@ -20,8 +19,7 @@ module Rake
     end
     
     def define
-      directory java_files.dstdir
-      desc description unless description.nil?
+	  desc "compile files in #{java_files.srcdir}" if Rake.application.last_comment.nil?
       task name => dependencies + [ *java_files ] do |t|
           
         parms = [ "-d", java_files.dstdir, "-sourcepath", java_files.srcdir ]
@@ -32,14 +30,18 @@ module Rake
           ret = compile(parms, pw)
         end
 
-        raise "Compile error:\n#{javacout}" unless ret == 0
-        
-        copy_resources
+        raise "Compile error:\n#{javacout}" unless ret == 0        
+        post_compile
       end
+      directory java_files.dstdir
     end
     
    
-    protected
+    protected    
+    def post_compile
+      copy_resources
+    end
+    
     def compile( parameters, printwriter )
       javac = Rjb::import('com.sun.tools.javac.Main')
       javac.compile(parameters, printwriter)

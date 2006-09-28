@@ -9,20 +9,17 @@ module Rake
      attr_accessor :srcdir
      attr_accessor :dstdir
      attr_accessor :package
-     attr_accessor :description
      attr_accessor :dependencies
      
      def initialize(name = :javadoc)
       @name = name
       @dependencies = []
-      @description = "generate javadocs"
       yield self if block_given?
       define
      end
      
      def define
-      directory dstdir
-      desc description unless description.nil? 
+      desc "generate javadocs" if Rake.application.last_comment.nil?
       task name => dependencies << dstdir do |t|
         javadoc = Rjb::import('com.sun.tools.javadoc.Main')
     
@@ -43,6 +40,7 @@ module Rake
         ret = javadoc.execute(args)
         raise "error generating javadocs" unless ret==0
       end
+      directory dstdir
      end
   end
 end

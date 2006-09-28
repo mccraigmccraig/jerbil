@@ -6,7 +6,7 @@ require File.dirname(__FILE__) + '/java_helper'
 
 module Rake 
   module HibernateFoo 
-    class HibernateTask < TaskLib
+    class ExportSchemaTask < TaskLib
       include JavaHelper
       
       attr_accessor :name
@@ -125,8 +125,8 @@ module Rake
           pkg = clazz.getPackage
           packages << pkg.getName if pkg.getAnnotations.length > 0
         end
+        packages << package unless package.nil?
         packages.each { |pkg| acfg.addPackage(pkg) }
-        acfg.addPackage(package) unless package.nil?
         acfg
       end
     end
