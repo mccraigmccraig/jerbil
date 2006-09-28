@@ -5,12 +5,15 @@ require File.dirname(__FILE__) + '/java_helper'
 module Rake
   module TestNG
     class TestNGTask < TaskLib
+      include JavaHelper
+      
       attr_accessor :name
       attr_accessor :description
       attr_accessor :dependencies
       attr_accessor :testclasses
       attr_accessor :outputdir
       attr_accessor :report
+      attr_accessor :suites
       
       def initialize(name)
         @name = name
@@ -18,6 +21,7 @@ module Rake
         @testclasses = []
         @outputdir = "test-output"
         @report = true
+        @suites = []
         yield self if block_given?
         define
       end
@@ -33,8 +37,13 @@ module Rake
             testng.addListener(Rjb::import('org.testng.reporters.SuiteHTMLReporter').new)
             testng.addListener(Rjb::import('org.testng.reporters.TestHTMLReporter').new)
           end
-          testklasses = testclasses.map { |clazz| Rjb::import(clazz) }.to_a   
-          testng.setTestClasses( testklasses )
+         
+          if suites.empty?
+            testng.setTestClasses( testclasses.to_classes )
+          else
+            testng.setTestSuites( str_list(suites) )
+          end
+          
           testng.setOutputDirectory( outputdir )
           #testng.setParallel(true)
           testng.setVerbose( 2 )

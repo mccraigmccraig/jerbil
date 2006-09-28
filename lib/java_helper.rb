@@ -10,7 +10,7 @@ module JavaHelper
   def printStream_to_s(&block)
     yieldIO('java.io.PrintStream', block)
   end
-  
+ 
   def printWriter_to_s(&block)
     yieldIO('java.io.PrintWriter', block)
   end
@@ -23,6 +23,17 @@ module JavaHelper
     st = Rjb::import('java.lang.String').new_with_sig '[B', out.toByteArray
     String.new(st.toString)
   end
+  
+  def empty_list
+    Rjb::import('java.util.ArrayList').new
+  end
+  
+  def str_list(strings)
+    l = empty_list
+    strings.each { |s| l.add s.to_s }
+    l
+  end
+  
   
   def serialize(obj)
     byteoos = Rjb::import('java.io.ByteArrayOutputStream').new
@@ -83,8 +94,12 @@ class JavaFileList < Rake::FileList
     include(srcdir + "/**/*.java")
   end
   
-  def to_classes
+  def to_classnames
 	  self.pathmap("%{^#{srcdir}/,}X").gsub("/", ".")
+  end
+  
+  def to_classes
+    to_classnames.map {|name| Rjb::import(name)}.to_a
   end
   
   def to_classfiles

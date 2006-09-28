@@ -21,8 +21,9 @@ module Rake
      end
      
      def define
+      directory dstdir
       desc description unless description.nil? 
-      task name => dependencies do |t|
+      task name => dependencies << dstdir do |t|
         javadoc = Rjb::import('com.sun.tools.javadoc.Main')
     
         args = [ "-sourcepath", srcdir, 

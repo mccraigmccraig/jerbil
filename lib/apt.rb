@@ -48,13 +48,13 @@ class Apt
   # AnnotationFactory methods
   def supportedOptions
     #returns collection of strings
-    Rjb::import('java.util.ArrayList').new
+    empty_list
   end
 
   def supportedAnnotationTypes
     #returns collection of strings
     puts "supportedAnnotationTypes()" if $APT_DEBUG
-    list = Rjb::import('java.util.ArrayList').new
+    list = empty_list
     list.add 'javax.persistence.Entity'
     list.add 'trampothing.annotations.ViewTable'
     list

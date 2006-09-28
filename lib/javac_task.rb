@@ -21,23 +21,34 @@ module Rake
     def define
       desc description unless description.nil?
       task name => dependencies + [ *java_files ] do |t|
+          
         parms = [ "-d", java_files.dstdir, "-sourcepath", java_files.srcdir ]
         parms += java_files
-        javac = Rjb::import('com.sun.tools.javac.Main')
       
         ret = 0
         javacout = printWriter_to_s do |pw|
-          ret = javac.compile( parms, pw )
+          ret = compile(parms, pw)
         end
 
         raise "Compile error:\n#{javacout}" unless ret == 0
         
-        java_files.resources.each do |f|
-          target =  f.sub(/#{java_files.srcdir}/, java_files.dstdir)
-          mkdir_p File.dirname(target)
-          cp f, target
-        end
+        copy_resources
       end
-    end 
-  end
+    end
+    
+   
+    protected
+    def compile( parameters, printwriter )
+      javac = Rjb::import('com.sun.tools.javac.Main')
+      javac.compile(parameters, printwriter)
+    end
+    
+    def copy_resources
+      java_files.resources.each do |f|
+        target =  f.sub(/#{java_files.srcdir}/, java_files.dstdir)
+        mkdir_p File.dirname(target)
+        cp f, target
+      end
+    end
+  end 
 end
