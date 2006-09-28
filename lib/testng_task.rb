@@ -14,6 +14,7 @@ module Rake
       attr_accessor :outputdir
       attr_accessor :report
       attr_accessor :suites
+      attr_accessor :workingdir
       
       def initialize(name)
         @name = name
@@ -22,11 +23,16 @@ module Rake
         @outputdir = "test-output"
         @report = true
         @suites = []
+        @workingdir = nil
         yield self if block_given?
+        dependencies << workingdir unless workingdir.nil?
+        dependencies << outputdir
         define
       end
       
       def define
+        directory workingdir unless workingdir.nil?
+        directory outputdir
         desc description unless description.nil?
         task name => dependencies do |t|
           tl = Rake::TestNG::TestListener.new
@@ -47,7 +53,12 @@ module Rake
           testng.setOutputDirectory( outputdir )
           #testng.setParallel(true)
           testng.setVerbose( 2 )
-          testng.run
+          
+          if workingdir.nil?
+            testng.run
+          else
+            Dir.chdir(workingdir) { testng.run }
+          end
       
           raise "some tests failed: #{tl.failed_to_s}" unless testng.getStatus == 0
         end

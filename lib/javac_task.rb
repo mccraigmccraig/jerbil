@@ -15,10 +15,12 @@ module Rake
       @name = name
       @dependencies = []     
       yield self if block_given?
-      define
+      dependencies << java_files.dstdir
+      define     
     end
     
     def define
+      directory java_files.dstdir
       desc description unless description.nil?
       task name => dependencies + [ *java_files ] do |t|
           
