@@ -1,5 +1,6 @@
 require 'rake'
 require 'rake/tasklib'
+require 'set'
 require File.dirname(__FILE__) + '/java_helper'
 
 module Rake
@@ -77,16 +78,24 @@ module Rake
         attr_reader :failed_classes
         def initialize
           @failed_classes = Set.new
+		  @outfile = nil
         end
         
         def onFinish(context)
-          @outfile.close
+          @outfile.close unless @outfile.nil?
         end
         
         def onStart(context)
-          file = File.join(context.getOutputDirectory, "#{context.getName}.output")
-          @outfile = File.open( file , "w") 
+		  $stderr.puts "onStart"
+		  open_log(context)
         end
+
+		def open_log(context)
+		  if @outfile.nil?
+          	file = File.join(context.getOutputDirectory, "#{context.getName}.output")
+	        @outfile = File.open( file , "w") 
+		  end
+		end
         
         def onTestFailedButWithinSuccessPercentage(result)
         end
@@ -107,19 +116,31 @@ module Rake
         end
         
         def onTestSkipped(result)
+			  $stderr.puts "onTestSkipped"
         end
         
         def onTestStart(result)
+		   $stderr.puts "onTestStart"
           log "starting test #{result.getTestClass.getName}.#{result.getMethod.getMethodName}"
           @outfile.flush
         end
         
         def onTestSuccess(result)
+          log "starting test #{result.getTestClass.getName}.#{result.getMethod.getMethodName}"
           $stderr.print "."      
         end
         
         def log(s)
-          @outfile.puts s.to_s
+		  begin
+			$stderr.puts s.to_s if @outfile.nil?
+	        @outfile.puts s.to_s  unless @outfile.nil?
+		  rescue
+		  	require 'pp'
+			pp caller
+			$stderr.puts "rescue"
+		  end
+		  
+		  
         end
         
         def failed_to_s
@@ -149,7 +170,7 @@ module Rake
             xml.suite(:name => suitename ) do      
               if onetest                
                 xml.test(:name=>"all") do
-                  write_includes_excludes(xml, ["slow", "failing"])
+                  write_includes_excludes(xml, ["failing"])
                   xml.classes do
                     classnames.sort.each do | klass |
                       xml.tag!("class", :name => klass ) 
