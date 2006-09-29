@@ -86,12 +86,12 @@ class JavaFileList < Rake::FileList
   attr_reader :dstdir
   attr_accessor :resource_patterns
   
-  def initialize(srcdir, dstdir)
+  def initialize(srcdir, dstdir, extensions = nil)
     super([])
     @srcdir = srcdir
     @dstdir = dstdir
     @resource_patterns = []
-    copy_extensions = [ "xml", "yml", "properties", "rb", "txt", "vm" ] 
+    copy_extensions = extensions || [ "xml", "properties" ] 
     copy_extensions.each { |ext| add_extension(ext) } 
     include(srcdir + "/**/*.java")
   end
@@ -116,6 +116,10 @@ class JavaFileList < Rake::FileList
   
   def add_extension(ext)
     @resource_patterns << "/**/*.#{ext}"
+  end
+  
+  def add_extensions(exts)
+    @resource_patterns.concat(exts.to_a)
   end
 end
 
