@@ -14,6 +14,7 @@ module Rake
       attr_accessor :report
       attr_accessor :suites
       attr_accessor :workingdir
+      attr_accessor :excludedgroups
       
       def initialize(name)
         @name = name
@@ -23,6 +24,7 @@ module Rake
         @report = true
         @suites = []
         @workingdir = nil
+        @excludedgroups = nil
         yield self if block_given?
         dependencies << workingdir unless workingdir.nil?
         dependencies << outputdir
@@ -51,6 +53,7 @@ module Rake
             testng.setTestSuites( str_list(suites) )
           end
           
+          #testng.setExcludedGroups( excludedgroups ) unless excludedgroups.nil?
           testng.setOutputDirectory( outputdir )
           #testng.setParallel(true)
           testng.setVerbose( 1 )
@@ -100,17 +103,19 @@ module Rake
             log "------------------------------------------------------------------------"
           rescue 
             $stderr.puts $!
-          end
+          end        
         end
         
         def onTestSkipped(result)
         end
         
         def onTestStart(result)
+          log "starting test #{result.getTestClass.getName}.#{result.getMethod.getMethodName}"
+          @outfile.flush
         end
         
         def onTestSuccess(result)
-          $stderr.print "."
+          $stderr.print "."      
         end
         
         def log(s)
@@ -142,9 +147,9 @@ module Rake
             xml.declare! :DOCTYPE, :suite, :SYSTEM, "http://testng.org/testng-1.0.dtd" 
             
             xml.suite(:name => suitename ) do      
-            
-              if onetest
+              if onetest                
                 xml.test(:name=>"all") do
+                  write_includes_excludes(xml, ["slow", "failing"])
                   xml.classes do
                     classnames.sort.each do | klass |
                       xml.tag!("class", :name => klass ) 
@@ -162,7 +167,22 @@ module Rake
               end
             end
           end
-        end
+                         
+        end # create_suite_xml 
+      
+        
+        def write_includes_excludes(xml, excluded, included = [])           
+              xml.groups do
+                xml.run do
+                  excluded.each do |ex|
+                    xml.exclude(:name => ex)
+                  end
+                  included.each do |inc|
+                    xml.tag!("include", :name => inc)
+                  end
+                end
+              end
+          end          
       end
     end
 end

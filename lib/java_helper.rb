@@ -90,7 +90,9 @@ class JavaFileList < Rake::FileList
     super([])
     @srcdir = srcdir
     @dstdir = dstdir
-    @resource_patterns = [ "/**/*.xml", "/**/*.yml", "/**/*.rb", "/**/*.txt" ]
+    @resource_patterns = []
+    copy_extensions = [ "xml", "yml", "properties", "rb", "txt", "vm" ] 
+    copy_extensions.each { |ext| add_extension(ext) } 
     include(srcdir + "/**/*.java")
   end
   
@@ -111,5 +113,9 @@ class JavaFileList < Rake::FileList
     resource_patterns.each { |p| r.include(srcdir+p) }
     r
   end 
+  
+  def add_extension(ext)
+    @resource_patterns << "/**/.#{ext}"
+  end
 end
 
