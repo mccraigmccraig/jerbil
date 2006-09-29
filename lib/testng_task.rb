@@ -154,7 +154,7 @@ module Rake
     
     
       class << self
-        def create_suite_xml(filename, classnames, suitename="default", onetest=false)
+        def create_suite_xml(filename, classnames, suitename="default", onetest=false, excluded = [])
           File.open(filename, 'w') do |suitexml|
             xml = Builder::XmlMarkup.new(:target=>suitexml, :indent=>4)
             xml.instruct!
@@ -163,7 +163,7 @@ module Rake
             xml.suite(:name => suitename ) do      
               if onetest                
                 xml.test(:name=>"all") do
-                  write_includes_excludes(xml, ["failing"])
+                  write_includes_excludes(xml, excluded )
                   xml.classes do
                     classnames.sort.each do | klass |
                       xml.tag!("class", :name => klass ) 
