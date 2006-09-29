@@ -78,7 +78,7 @@ module Rake
         attr_reader :failed_classes
         def initialize
           @failed_classes = Set.new
-		  @outfile = nil
+          @outfile = nil
         end
         
         def onFinish(context)
@@ -86,17 +86,9 @@ module Rake
         end
         
         def onStart(context)
-		  $stderr.puts "onStart"
-		  open_log(context)
+          open_log(context)
         end
-
-		def open_log(context)
-		  if @outfile.nil?
-          	file = File.join(context.getOutputDirectory, "#{context.getName}.output")
-	        @outfile = File.open( file , "w") 
-		  end
-		end
-        
+  
         def onTestFailedButWithinSuccessPercentage(result)
         end
         
@@ -105,7 +97,7 @@ module Rake
           
           @failed_classes.add result.getTestClass.getName
           begin
-            log result.getTestClass.getName + ":" + result.getMethod.getMethodName
+            log get_test_name(result)
             log result.getThrowable.getMessage
             trace = printStream_to_s {|ps| result.getThrowable.printStackTrace(ps) }
             log trace
@@ -116,36 +108,37 @@ module Rake
         end
         
         def onTestSkipped(result)
-			  $stderr.puts "onTestSkipped"
+          log "skipped test " + get_test_name(result)
         end
         
-        def onTestStart(result)
-		   $stderr.puts "onTestStart"
-          log "starting test #{result.getTestClass.getName}.#{result.getMethod.getMethodName}"
+        def onTestStart(result)		
+          log "starting test " + get_test_name(result)
           @outfile.flush
         end
         
         def onTestSuccess(result)
-          log "starting test #{result.getTestClass.getName}.#{result.getMethod.getMethodName}"
           $stderr.print "."      
         end
-        
-        def log(s)
-		  begin
-			$stderr.puts s.to_s if @outfile.nil?
-	        @outfile.puts s.to_s  unless @outfile.nil?
-		  rescue
-		  	require 'pp'
-			pp caller
-			$stderr.puts "rescue"
-		  end
-		  
-		  
-        end
-        
+     
         def failed_to_s
           @failed_classes.to_a.join(', ')   
         end
+                
+        private 
+        def get_test_name(result)
+          "#{result.getTestClass.getName}.#{result.getMethod.getMethodName}"
+        end
+        
+        def open_log(context)
+          if @outfile.nil?
+            file = File.join(context.getOutputDirectory, "#{context.getName}.output")
+            @outfile = File.open( file , "w") 
+          end
+        end
+        
+        def log(s)
+          (@outfile || $stderr).puts s.to_s
+        end 
       end
       
       class SuiteListener

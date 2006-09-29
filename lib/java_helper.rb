@@ -115,7 +115,7 @@ class JavaFileList < Rake::FileList
   end 
   
   def add_extension(ext)
-    @resource_patterns << "/**/.#{ext}"
+    @resource_patterns << "/**/*.#{ext}"
   end
 end
 

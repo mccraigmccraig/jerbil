@@ -9,10 +9,12 @@ module Rake
     attr_accessor :name
     attr_accessor :java_files
     attr_accessor :dependencies
+    attr_accessor :nowarn
 
     def initialize(name)
       @name = name
       @dependencies = []     
+      @nowarn = false
       yield self if block_given?
       dependencies << java_files.dstdir
       define     
@@ -23,8 +25,9 @@ module Rake
       task name => dependencies + [ *java_files ] do |t|
           
         parms = [ "-d", java_files.dstdir, "-sourcepath", java_files.srcdir ]
-        parms += java_files
-      
+        parms << "-nowarn" if nowarn
+        parms += java_files      
+             
         ret = 0
         javacout = printWriter_to_s do |pw|
           ret = compile(parms, pw)
