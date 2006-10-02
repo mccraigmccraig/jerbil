@@ -163,7 +163,7 @@ module Rake
             xml.suite(:name => suitename ) do      
               if onetest                
                 xml.test(:name=>"all") do
-                  write_includes_excludes(xml, excluded )
+                  write_excludes_includes(xml, excluded )
                   xml.classes do
                     classnames.sort.each do | klass |
                       xml.tag!("class", :name => klass ) 
@@ -185,7 +185,7 @@ module Rake
         end # create_suite_xml 
       
         
-        def write_includes_excludes(xml, excluded, included = [])           
+        def write_excludes_includes(xml, excluded, included = [])           
               xml.groups do
                 xml.run do
                   excluded.each do |ex|

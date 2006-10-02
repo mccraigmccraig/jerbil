@@ -19,19 +19,21 @@ class TestJavaHelper < Test::Unit::TestCase
 
 	def test_to_classes
 		flist = JavaFileList.new("src","dst")
-        flist.add("src/org/foo/Bla.java")
-        flist.add("src/org/foo/Baz.java")
+    flist.add("java/lang/String.java")
+    flist.add("java/util/Map.java")
 
-        cf = flist.to_classes
-        assert cf.length == 2
-        assert_equal 'org.foo.Bla', cf[0]
-        assert_equal 'org.foo.Baz', cf[1]
+    cf = flist.to_classes
+    assert cf.length == 2
+    assert_equal 'java.lang.String', cf[0].getName
+    assert_equal 'java.util.Map', cf[1].getName
 	end
 
 	def test_to_cp
 		flist = FileList["ab.jar", "cd.jar", "ef.jar"]
-		cp = flist.to_cp
-		assert_equal 'ab.jar:cd.jar:ef.jar', cp
+    $IS_WINDOWS = false
+		assert_equal 'ab.jar:cd.jar:ef.jar', flist.to_cp
+    $IS_WINDOWS = true
+    assert_equal 'ab.jar;cd.jar;ef.jar', flist.to_cp
 	end
 end
 

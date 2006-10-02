@@ -6,7 +6,7 @@ module Rake
   
      # Name for task
      attr_accessor :name
-     attr_accessor :srcdir
+     attr_accessor :sourcepath
      attr_accessor :dstdir
      attr_accessor :package
      attr_accessor :dependencies
@@ -23,7 +23,7 @@ module Rake
       task name => dependencies << dstdir do |t|
         javadoc = Rjb::import('com.sun.tools.javadoc.Main')
     
-        args = [ "-sourcepath", srcdir, 
+        args = [ "-sourcepath", sourcepath, 
                  "-d", dstdir, 
                  "-subpackages", package, 
                  "-quiet"]

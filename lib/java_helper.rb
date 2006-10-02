@@ -5,7 +5,8 @@ require 'rake'
 # for some really weird reasons schemaexport fails on mac os x
 # if java is not running in debug mode
 $JAVA_DEBUG = RUBY_PLATFORM =~ /darwin/i || false
-$IS_WINDOWS = RUBY_PLATFORM =~ /mswin/i || false
+$IS_WINDOWS = RUBY_PLATFORM =~ /mswin/i
+$JAVA_PATH_SEPERATOR = $IS_WINDOWS ? ';' : ':'
 
 module JavaHelper
   def printStream_to_s(&block)
@@ -48,12 +49,13 @@ module JavaHelper
     byteoos.toByteArray
   end
   
-  def load_vm(classpath, loggingprops = nil )
+  def load_vm(classpath, loggingprops = nil, build_dir = nil ) 
     #need verbose java exceptions
     $VERBOSE = true
-    #include build jars
+    #include build jars and custom classloader
     classpath.include(File.join(File.dirname(__FILE__), "../buildsupport/*.jar"))
-   
+    classpath.include(File.join(File.dirname(__FILE__), "../classloader")) unless build_dir.nil?
+    
     jvmargs = []    
     jvmargs << "-Djava.util.logging.config.file=#{loggingprops.to_s}" unless loggingprops.nil? 
 
@@ -63,7 +65,10 @@ module JavaHelper
       "-Xnoagent",
       "-Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n" ]
     end
-
+    
+    jvmargs += [ "-Djava.system.class.loader=JerbilClassLoader", 
+      "-Dbuild.root=#{build_dir}" ] unless build_dir.nil?
+    
     begin
     	Rjb::load(classpath.to_cp, jvmargs)
     rescue 
@@ -74,13 +79,9 @@ module JavaHelper
 end
 
 
-class FileList
-  
+class FileList  
   def to_cp  
-    cp = ""
-    sep = $IS_WINDOWS ? ";" : ":"
-    self.each { |file| cp += file + sep }
-    cp[0, cp.length-1]
+    self.join($JAVA_PATH_SEPERATOR)
   end
 end
 
@@ -96,7 +97,7 @@ class JavaFileList < Rake::FileList
     @resource_patterns = []
     copy_extensions = extensions || [ "xml", "properties" ] 
     copy_extensions.each { |ext| add_extension(ext) } 
-    include( srcdir + "/**/*.java")
+    include(srcdir + "/**/*.java")
   end
   
   def to_classnames
@@ -111,11 +112,22 @@ class JavaFileList < Rake::FileList
     self.pathmap("%{^#{srcdir},#{dstdir}}X.class")
   end
   
+  def sourcepath
+    srcdir
+  end
+  
   def resources
     r = FileList.new
     resource_patterns.each { |p| r.include(srcdir+p) }
     r
   end 
+  
+  def resources_and_target
+    resources.each do | r |
+      target =  r.sub(/#{srcdir}/, dstdir)
+      yield r, target if block_given?
+    end
+  end
   
   def add_extension(ext)
     @resource_patterns << "/**/*.#{ext}"
@@ -124,7 +136,56 @@ class JavaFileList < Rake::FileList
   def add_extensions(exts)
     @resource_patterns.concat(exts.to_a)
   end
+end
+
+class MultiJavaFileList
+
+  attr_reader :modules, :dstdir
   
+  def initialize(modules, dstdir, srcprefix = "src", copypat = nil) 
+    @java_files = []
+    @modules = modules
+    @dstdir = dstdir
+    modules.each do | m |
+      srcdir = File.join(m, srcprefix).to_s
+      @java_files << JavaFileList.new(srcdir, dstdir, copypat )
+    end
+  end
   
+  def sourcepath
+    @java_files.collect{|jf| jf.srcdir}.join($JAVA_PATH_SEPERATOR)
+  end
+  
+  def srcdir
+    @java_files.collect{|jf| jf.srcdir}
+  end
+  
+  def to_a
+    files = []
+    @java_files.each do |f|
+      files += f
+    end
+    files
+  end
+  
+  def to_ary
+    to_a
+  end  
+  
+  def resources
+    res = []
+    @java_files.each do |f|
+      res += f.resources  
+    end
+    res
+  end
+  
+  def resources_and_target
+    @java_files.each do |jf|
+      jf.resources_and_target do |r,t|
+        yield r,t
+      end
+    end
+  end
 end
 

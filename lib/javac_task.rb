@@ -11,6 +11,7 @@ module Rake
     attr_accessor :dependencies
     attr_accessor :nowarn
 
+    
     def initialize(name)
       @name = name
       @dependencies = []     
@@ -21,17 +22,24 @@ module Rake
     end
     
     def define
-	  desc "compile files in #{java_files.srcdir}" if Rake.application.last_comment.nil?
-      task name => dependencies + [ *java_files ] do |t|
+	  desc "compile files in #{java_files.srcdir.to_a.join(', ')}" if Rake.application.last_comment.nil?
+      #task name => dependencies + [ *java_files ] do |t|
+      task name => dependencies do |t|
           
-        parms = [ "-d", java_files.dstdir, "-sourcepath", java_files.srcdir ]
+        parms = [ "-d", java_files.dstdir ]
+        parms += [ "-sourcepath", java_files.sourcepath ] unless java_files.sourcepath.nil? 
+        
         parms << "-nowarn" if nowarn
-	# must do this to prevent javac bombing out on the file package-info.java
-	# due to known javac bug 6198196 - http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6198196
-	# $IS_WINDOWS is defined in the java_helper file - bit icky, I know, but it works
-	java_files.gsub!( "/", "\\" ) if $IS_WINDOWS
+        # must do this to prevent javac bombing out on the file package-info.java
+        # due to known javac bug 6198196 - http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6198196
+        # $IS_WINDOWS is defined in the java_helper file - bit icky, I know, but it works
+        java_files.gsub!( "/", "\\" ) if $IS_WINDOWS
+        
         parms += java_files      
              
+        #require 'pp'
+        #pp parms
+        
         ret = 0
         javacout = printWriter_to_s do |pw|
           ret = compile(parms, pw)
@@ -42,8 +50,7 @@ module Rake
       end
       directory java_files.dstdir
     end
-    
-   
+  
     protected    
     def post_compile
       copy_resources
@@ -55,10 +62,9 @@ module Rake
     end
     
     def copy_resources
-      java_files.resources.each do |f|
-        target =  f.sub(/#{java_files.srcdir}/, java_files.dstdir)
+      java_files.resources_and_target do |res, target|
         mkdir_p File.dirname(target)
-        cp f, target
+        cp res, target
       end
     end
   end 
