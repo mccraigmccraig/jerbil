@@ -5,6 +5,7 @@ require 'rake'
 # for some really weird reasons schemaexport fails on mac os x
 # if java is not running in debug mode
 $JAVA_DEBUG = RUBY_PLATFORM =~ /darwin/i || false
+$IS_WINDOWS = RUBY_PLATFORM =~ /mswin/i || false
 
 module JavaHelper
   def printStream_to_s(&block)
@@ -64,7 +65,7 @@ module JavaHelper
     end
 
     begin
-      Rjb::load(classpath.to_cp, jvmargs)
+    	Rjb::load(classpath.to_cp, jvmargs)
     rescue 
 	    $stderr << "could not load java vm: make sure JAVA_HOME is set correctly!\n"
       raise
@@ -74,9 +75,11 @@ end
 
 
 class FileList
+  
   def to_cp  
     cp = ""
-    self.each { |file| cp += file + ":" }
+    sep = $IS_WINDOWS ? ";" : ":"
+    self.each { |file| cp += file + sep }
     cp[0, cp.length-1]
   end
 end
@@ -93,7 +96,7 @@ class JavaFileList < Rake::FileList
     @resource_patterns = []
     copy_extensions = extensions || [ "xml", "properties" ] 
     copy_extensions.each { |ext| add_extension(ext) } 
-    include(srcdir + "/**/*.java")
+    include( srcdir + "/**/*.java")
   end
   
   def to_classnames
@@ -121,5 +124,7 @@ class JavaFileList < Rake::FileList
   def add_extensions(exts)
     @resource_patterns.concat(exts.to_a)
   end
+  
+  
 end
 
