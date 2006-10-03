@@ -5,7 +5,7 @@ require 'rake'
 # for some really weird reasons schemaexport fails on mac os x
 # if java is not running in debug mode
 $JAVA_DEBUG = RUBY_PLATFORM =~ /darwin/i || false
-$IS_WINDOWS = RUBY_PLATFORM =~ /mswin/i
+$IS_WINDOWS = RUBY_PLATFORM =~ /mswin|mingw/i
 $JAVA_PATH_SEPERATOR = $IS_WINDOWS ? ';' : ':'
 
 module JavaHelper
@@ -65,6 +65,12 @@ module JavaHelper
       "-Xnoagent",
       "-Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n" ]
     end
+    
+    #java_home = ENV['JAVA_HOME']    
+    #ENV['LD_LIBRARY_PATH'] = "#{java_home}/jre/lib/i386:#{java_home}/jre/lib/i386/client"
+    
+    #puts "lib:" + ENV['LD_LIBRARY_PATH']
+    #jvmargs << "-Djava.library.path=#{ENV['JAVA_HOME']}/jre/lib/i386"
     
     jvmargs += [ "-Djava.system.class.loader=JerbilClassLoader", 
       "-Dbuild.root=#{build_dir}" ] unless build_dir.nil?
@@ -147,7 +153,7 @@ class MultiJavaFileList
     @modules = modules
     @dstdir = dstdir
     modules.each do | m |
-      srcdir = File.join(m, srcprefix).to_s
+      srcdir = File.join(m, srcprefix)
       @java_files << JavaFileList.new(srcdir, dstdir, copypat )
     end
   end

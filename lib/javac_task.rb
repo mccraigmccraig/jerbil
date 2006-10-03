@@ -10,12 +10,14 @@ module Rake
     attr_accessor :java_files
     attr_accessor :dependencies
     attr_accessor :nowarn
+    attr_accessor :verbose
 
     
     def initialize(name)
       @name = name
       @dependencies = []     
       @nowarn = false
+      @verbose = false
       yield self if block_given?
       dependencies << java_files.dstdir
       define     
@@ -30,6 +32,8 @@ module Rake
         parms += [ "-sourcepath", java_files.sourcepath ] unless java_files.sourcepath.nil? 
         
         parms << "-nowarn" if nowarn
+        parms << "-verbose" if verbose
+        
         # must do this to prevent javac bombing out on the file package-info.java
         # due to known javac bug 6198196 - http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6198196
         # $IS_WINDOWS is defined in the java_helper file - bit icky, I know, but it works
@@ -63,8 +67,9 @@ module Rake
     
     def copy_resources
       java_files.resources_and_target do |res, target|
-        mkdir_p File.dirname(target)
-        cp res, target
+        directory = File.dirname(target)
+        mkdir_p directory, :verbose=>verbose unless File.directory?(directory)
+        cp res, target, :verbose=>verbose unless uptodate?(target,res)
       end
     end
   end 
