@@ -10,7 +10,7 @@ module Rake
       
       attr_accessor :name
       attr_accessor :dependencies
-      attr_accessor :testclasses
+      attr_accessor :tests
       attr_accessor :outputdir
       attr_accessor :report
       attr_accessor :suites
@@ -20,7 +20,7 @@ module Rake
       def initialize(name)
         @name = name
         @dependencies = []
-        @testclasses = []
+        @tests = JavaFileList.new
         @outputdir = "test-output"
         @report = true
         @suites = []
@@ -49,7 +49,7 @@ module Rake
           end
          
           if suites.empty?
-            testng.setTestClasses( testclasses.to_classes )
+            testng.setTestClasses( tests.to_classes )
           else
             testng.setTestSuites( str_list(suites) )
           end

@@ -31,7 +31,7 @@ task :test_compile => [ :compile ]
 
 desc "run tests"
 Rake::TestNG::TestNGTask.new(:test) do |t|
-  t.testclasses = JAVA_TEST_FILES.to_classes
+  t.tests = JAVA_TEST_FILES
 end
 task :test => [ :test_compile ]
 
