@@ -1,0 +1,47 @@
+require 'rake'
+
+Dir['jerbil/lib/*.rb'].each {|f| require f}
+
+include JavaHelper
+
+SOURCE_DIR          = "##SRC##"
+TEST_SOURCE_DIR     = "##TESTSRC##"
+BUILD_DIR           = "build"
+JAVA_BUILD_DIR      = "#{BUILD_DIR}/java"
+JAVADOC_DIR         = "#{BUILD_DIR}/javadoc"
+JAVA_FILES          = JavaFileList.new(SOURCE_DIR,      JAVA_BUILD_DIR)
+JAVA_TEST_FILES     = JavaFileList.new(TEST_SOURCE_DIR, JAVA_BUILD_DIR) 
+
+CLASSPATH           = FileList["./#{JAVA_BUILD_DIR}", "./lib/*.jar" ]
+
+load_vm(CLASSPATH)
+
+task :default => :compile
+
+desc "compile all java files"
+Rake::JavacTask.new(:compile) do |jct|
+  jct.java_files = JAVA_FILES
+end
+
+desc "compile all tests"
+Rake::JavacTask.new(:test_compile) do |jct|
+  jct.java_files = JAVA_TEST_FILES
+end
+task :test_compile => [ :compile ]
+
+desc "run tests"
+Rake::TestNG::TestNGTask.new(:test) do |t|
+  t.testclasses = JAVA_TEST_FILES.to_classes
+end
+task :test => [ :test_compile ]
+
+Rake::JavaDocTask.new do |t|
+  t.sourcepath = SOURCE_DIR
+  t.dstdir = JAVADOC_DIR
+end
+task :javadoc => [ :compile ]
+
+task :clean do |t|
+  rm_rf BUILD_DIR
+end
+
