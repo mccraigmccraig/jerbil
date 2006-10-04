@@ -10,10 +10,14 @@ module Rake
      attr_accessor :dstdir
      attr_accessor :package
      attr_accessor :dependencies
+     attr_accessor :verbose
+     attr_accessor :links
      
      def initialize(name = :javadoc)
       @name = name
       @dependencies = []
+      @verbose = false
+      @links = []
       yield self if block_given?
       define
      end
@@ -24,18 +28,19 @@ module Rake
         javadoc = Rjb::import('com.sun.tools.javadoc.Main')
     
         args = [ "-sourcepath", sourcepath, 
-                 "-d", dstdir, 
-                 "-subpackages", package, 
-                 "-quiet"]
+                 "-d", dstdir ]
+                                
+        args << "-quiet" unless verbose                 
+        args +=[ "-subpackages", package ] unless package.nil? 
     
-         links = [ "http://java.sun.com/j2se/1.5.0/docs/api", 
+        links = [ "http://java.sun.com/j2se/1.5.0/docs/api", 
                 "http://static.springframework.org/spring/docs/2.0.x/api",
                 "http://www.hibernate.org/hib_docs/v3/api/",
                 "http://www.hibernate.org/hib_docs/annotations/api/",
                 "http://java.sun.com/javaee/5/docs/api/",
-                "http://www.alias-i.com/lingpipe/docs/api/"]
+                ]
       
-        links.each {|l| args += ["-link", "#{l}" ] }
+        links.each {|l| args += ["-link", "#{l}" ] } 
     
         ret = javadoc.execute(args)
         raise "error generating javadocs" unless ret==0
