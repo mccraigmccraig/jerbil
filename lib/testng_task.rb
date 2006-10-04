@@ -20,7 +20,7 @@ module Rake
       def initialize(name)
         @name = name
         @dependencies = []
-        @tests = JavaFileList.new
+        @tests = []
         @outputdir = "test-output"
         @report = true
         @suites = []
@@ -48,7 +48,7 @@ module Rake
             testng.addListener(Rjb::import('org.testng.reporters.TestHTMLReporter').new)
           end
          
-          if suites.empty?
+          if suites.empty? && tests.respond_to?(:to_classes)
             testng.setTestClasses( tests.to_classes )
           else
             testng.setTestSuites( str_list(suites) )

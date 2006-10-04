@@ -11,12 +11,12 @@ Rake::TestTask.new do |t|
 end
 
 
-desc "install sample Rakefile"
+desc "install sample Rakefile. Specify your SRC=x and TESTSRC=y for your source file locations."
 task :install do |t|
 
   dstfile = File.join(Rake.original_dir, "../Rakefile")
     
-  raise "Rakefile already existant, delete it first to proceed" if File.exists?(dstfile)
+  raise "\n#{dstfile} already exists, delete it first to proceed\n" if File.exists?(dstfile)
   
   src = ENV['SRC'] || "src"
   testsrc = ENV['TESTSRC'] || "testsrc"
