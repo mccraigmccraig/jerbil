@@ -5,25 +5,34 @@ module Rake
   class JarTask < TaskLib
     include JavaHelper
   
-    attr_accessor :name, :dir, :filename
+    attr_accessor :name, :dir, :filename, :files
     
     def initialize(name=:jar)
+      @name = name
       yield self if block_given?
       raise "must define filename" if filename.nil? 
-      raise "must define dir" if dir.nil? 
+      raise "must define dir or files" if dir.nil? and files.nil? 
       define
     end
     
     def define
-      dir = File.basename(filename)
-      task name => [ dir ] do |t|
+      jardir = File.dirname(filename)
+      task name => [ jardir ] do |t|
          jar = Rjb::import('sun.tools.jar.Main')
          args = [ "cf" ]
          args << filename
-         args += [ "-C", dir, "." ]
+         
+         #unless dir.nil? 
+            args += [ "-C", dir, "." ]
+         #else
+         #   args += files.to_classfiles           
+         #end
+            
+         #require 'pp'
+         #pp args
          jar.main(args)
       end
-      directory dir
+      directory jardir
     end
   end
 end
