@@ -10,7 +10,6 @@ module Rake
       include JavaHelper
       
       attr_accessor :name
-      attr_accessor :dependencies
       
       attr_accessor :schemafile
       attr_accessor :persistencefile

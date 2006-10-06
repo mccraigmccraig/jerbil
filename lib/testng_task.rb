@@ -5,11 +5,10 @@ require File.dirname(__FILE__) + '/java_helper'
 
 module Rake
   module TestNG
-    class TestNGTask < TaskLib
+    class TestNGTask < Rake::TaskLib
       include JavaHelper
       
       attr_accessor :name
-      attr_accessor :dependencies
       attr_accessor :tests
       attr_accessor :outputdir
       attr_accessor :report
@@ -19,7 +18,6 @@ module Rake
       
       def initialize(name)
         @name = name
-        @dependencies = []
         @tests = []
         @outputdir = "test-output"
         @report = true
@@ -27,8 +25,8 @@ module Rake
         @workingdir = nil
         @excludedgroups = nil
         yield self if block_given?
-        dependencies << workingdir unless workingdir.nil?
-        dependencies << outputdir
+        depends_on workingdir unless workingdir.nil?
+        depends_on outputdir
         define
       end
       

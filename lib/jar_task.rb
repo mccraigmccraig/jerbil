@@ -11,13 +11,14 @@ module Rake
       @name = name
       yield self if block_given?
       raise "must define filename" if filename.nil? 
-      raise "must define dir or files" if dir.nil? and files.nil? 
+      raise "must define dir or files" if dir.nil? and files.nil?     
       define
     end
     
     def define
       jardir = File.dirname(filename)
-      task name => [ jardir ] do |t|
+      depends_on jardir
+      task name => dependencies do |t|
          jar = Rjb::import('sun.tools.jar.Main')
          args = [ "cf" ]
          args << filename

@@ -51,8 +51,16 @@ class TestBuild < Test::Unit::TestCase
   end
   
   def test_run
-    run_rake(:clean, :run) do
-    
+    run_rake(:clean, :run) do    
+    end
+  end
+  
+  def test_clean
+    run_rake(:clean, :compile, :jar, :test)
+    run_rake(:clean) do
+      assert !File.directory?(TESTOUTPUTDIR)  
+      assert !File.directory?(BUILD_DIR)
+      assert !File.directory?(DIST_DIR)
     end
   end
   

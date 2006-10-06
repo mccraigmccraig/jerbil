@@ -12,12 +12,13 @@ module Rake
       @name = name   
       yield self if block_given?
       raise "need dstdir parameter" if dstdir.nil?
+      depends_on dstdir
       define
      end
      
      def define
       desc "generate javadocs" if Rake.application.last_comment.nil?
-      task name => dstdir do |t|
+      task name => dependencies do |t|
         javadoc = Rjb::import('com.sun.tools.javadoc.Main')    
         args = [ "-d", dstdir ]                                                    
         args += extra_args unless extra_args.nil?

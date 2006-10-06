@@ -12,16 +12,18 @@ module Rake
 
     create_alias_for :g, :debug
     
-    def initialize(name)
+    def initialize(name)   
       @name = name
       @verbose = false
+    
       yield self if block_given?
+      depends_on java_files.dstdir
       define     
     end
     
     def define
 	    desc "compile files in #{java_files.srcdir.to_a.join(', ')}" if Rake.application.last_comment.nil?     
-      task name => java_files.dstdir do |t|
+      task name => dependencies do |t|
           
         parms  = [ "-d", java_files.dstdir ]
         parms += [ "-sourcepath", java_files.sourcepath ] unless java_files.sourcepath.nil? 

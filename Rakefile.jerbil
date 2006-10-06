@@ -19,27 +19,27 @@ load_vm(CLASSPATH)
 task :default => :compile
 
 desc "compile all java files"
-Rake::JavacTask.new(:compile) do |jct|
-  jct.java_files = JAVA_FILES
+Rake::JavacTask.new(:compile) do |t|
+  t.java_files = JAVA_FILES
 end
 
 desc "compile all tests"
-Rake::JavacTask.new(:test_compile) do |jct|
-  jct.java_files = JAVA_TEST_FILES
+Rake::JavacTask.new(:test_compile) do |t|
+  t.java_files = JAVA_TEST_FILES
+  t.depends_on :compile
 end
-task :test_compile => [ :compile ]
 
 desc "run tests"
 Rake::TestNG::TestNGTask.new(:test) do |t|
   t.tests = JAVA_TEST_FILES
+  t.depends_on :test_compile
 end
-task :test => [ :test_compile ]
 
 Rake::JavaDocTask.new do |t|
   t.sourcepath = SOURCE_DIR
   t.dstdir = JAVADOC_DIR
+  t.depends_on :compile
 end
-task :javadoc => [ :compile ]
 
 task :clean do |t|
   rm_rf BUILD_DIR

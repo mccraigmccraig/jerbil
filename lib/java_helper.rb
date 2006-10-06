@@ -121,9 +121,19 @@ module ExtraArgumentTaking
     end
 end
 
-class FileList  
+class Rake::FileList  
   def to_cp  
     self.join($JAVA_PATH_SEPERATOR)
+  end
+end
+
+class Rake::TaskLib  
+  def depends_on(*args)
+    dependencies.concat(args)
+  end
+  
+  def dependencies
+    @dependencies ||= []
   end
 end
 

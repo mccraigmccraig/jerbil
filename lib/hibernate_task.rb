@@ -10,8 +10,7 @@ module Rake
     class HibernateTask < TaskLib
       include JavaHelper
       
-      attr_accessor :name
-      attr_accessor :dependencies
+      attr_accessor :name    
       attr_accessor :description
       
       attr_accessor :srcfiles
@@ -22,8 +21,7 @@ module Rake
       
       def initialize(name)
         @name = name
-        @description = nil
-        @dependencies = []
+        @description = nil        
         @srcfiles = []
         @classpath = FileList.new
         @schemafile = "schema.sql"

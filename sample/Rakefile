@@ -9,61 +9,63 @@ load_vm(CLASSPATH)
 task :default => :compile
 
 desc "compile all java files"
-Rake::JavacTask.new(:compile) do |jct|
-  jct.java_files = JAVA_FILES
-  jct.options :nowarn, :debug
-  jct.source = "1.5"
-  jct.target = "1.5" 
+Rake::JavacTask.new(:compile) do |t|
+  t.java_files = JAVA_FILES
+  t.options :nowarn, :debug
+  t.source = "1.5"
+  t.target = "1.5" 
 end
 
 desc "compile all tests"
-Rake::JavacTask.new(:test_compile) do |jct|
-  jct.java_files = JAVA_TEST_FILES
+Rake::JavacTask.new(:test_compile) do |t|
+  t.java_files = JAVA_TEST_FILES
+  t.depends_on :compile
 end
-task :test_compile => [ :compile ]
 
 desc "run tests"
 Rake::TestNG::TestNGTask.new(:test) do |t|
   t.outputdir = TESTOUTPUTDIR
   t.tests     = JAVA_TEST_FILES
+  t.depends_on :test_compile
 end
-task :test => [ :test_compile ]
 
 Rake::JavaDocTask.new do |t|
   t.sourcepath = SOURCE_DIR
   t.subpackages = "jerbil"
   t.dstdir = JAVADOC_DIR
   t.options :quiet  
+  t.depends_on :compile
 end
-task :javadoc => [ :compile ]
 
 Rake::JarTask.new do |t|
   t.dir = JAVA_BUILD_DIR
   t.filename = DISTJAR
+  t.depends_on :clean, :compile
 end
-task :jar => [ :clean, :compile ]
 
 Rake::JavaTask.new(:run, "jerbil.sample.Main") do |t|
   t.classpath = CLASSPATH
   t.parameters = [ "50", "50" ]
+  t.depends_on :compile
 end
-task :run => [ :compile ]
 
 desc "find annotations and write output to #{ANNOTATED_CLASSES}"
 Rake::AptTask.new(:find_annotations) do |t|
   t.java_files= JAVA_FILES
   t.nocompile = true
+  t.depends_on :compile
   t.find_annotation 'jerbil.sample.MyAnnotation' do |classes|
     File.open(ANNOTATED_CLASSES, 'w') { |f| f << classes.to_yaml }
   end
 end
-task :find_annotations => [ :compile ]
+
 file ANNOTATED_CLASSES => [ :find_annotations ]
 
 task :clean do |t|
   RakeFileUtils.verbose(false) do
     rm_rf BUILD_DIR
     rm_rf DIST_DIR
+    rm_rf TESTOUTPUTDIR
   end
 end
 
