@@ -39,8 +39,12 @@ Rake::JarTask.new do |t|
 end
 task :jar => [ :clean, :compile ]
 
+Rake::JavaTask.new(:run, "jerbil.sample.Main") do |t|
+  t.classpath = CLASSPATH
+  t.parameters = [ "50", "50" ]
+end
+task :run => [ :compile ]
 
-file ANNOTATED_CLASSES => [:find_annotations]
 desc "find annotations and write output to #{ANNOTATED_CLASSES}"
 Rake::AptTask.new(:find_annotations) do |t|
   t.java_files= JAVA_FILES
@@ -49,6 +53,7 @@ Rake::AptTask.new(:find_annotations) do |t|
   end
 end
 task :find_annotations => [ :compile ]
+file ANNOTATED_CLASSES => [ :find_annotations ]
 
 task :clean do |t|
   RakeFileUtils.verbose(false) do

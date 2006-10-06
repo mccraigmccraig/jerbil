@@ -50,6 +50,12 @@ class TestBuild < Test::Unit::TestCase
     end
   end
   
+  def test_run
+    run_rake(:clean, :run) do
+    
+    end
+  end
+  
   private
   def assert_files_exist(files)
     files.each {|f| assert File.exists?(f)}

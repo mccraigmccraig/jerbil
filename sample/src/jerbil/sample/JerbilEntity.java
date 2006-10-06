@@ -14,7 +14,6 @@ public class JerbilEntity {
     private Long id;
     private String name;
 
-
     @Id
     public Long getId() {
         return id;
