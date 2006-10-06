@@ -1,6 +1,10 @@
-
-require 'rjb'
-require 'rake'
+begin
+	require 'rjb'
+	require 'rake'
+rescue LoadError
+	require 'rubygems'
+	retry
+end
 
 # for some really weird reasons schemaexport fails on mac os x
 # if java is not running in debug mode

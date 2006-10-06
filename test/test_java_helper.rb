@@ -1,7 +1,7 @@
+#!/usr/bin/env ruby
 
 $:.unshift File.join( File.dirname(__FILE__), "..", "lib" )
 
-require 'rubygems'
 require 'test/unit'
 require 'java_helper'
 
@@ -30,9 +30,9 @@ class TestJavaHelper < Test::Unit::TestCase
 
 	def test_to_cp
 		flist = FileList["ab.jar", "cd.jar", "ef.jar"]
-    $IS_WINDOWS = false
+    $JAVA_PATH_SEPERATOR = ":"
 		assert_equal 'ab.jar:cd.jar:ef.jar', flist.to_cp
-    $IS_WINDOWS = true
+    $JAVA_PATH_SEPERATOR = ";"
     assert_equal 'ab.jar;cd.jar;ef.jar', flist.to_cp
 	end
 end

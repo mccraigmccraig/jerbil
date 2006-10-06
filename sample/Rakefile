@@ -1,0 +1,59 @@
+require 'rake'
+Dir[File.join(Rake.original_dir, "..", "lib", "*.rb")].each {|f| require f}
+require 'buildconfig'
+
+include JavaHelper
+
+load_vm(CLASSPATH)
+
+task :default => :compile
+
+desc "compile all java files"
+Rake::JavacTask.new(:compile) do |jct|
+  jct.java_files = JAVA_FILES
+end
+
+desc "compile all tests"
+Rake::JavacTask.new(:test_compile) do |jct|
+  jct.java_files = JAVA_TEST_FILES
+end
+task :test_compile => [ :compile ]
+
+desc "run tests"
+Rake::TestNG::TestNGTask.new(:test) do |t|
+  t.outputdir = TESTOUTPUTDIR
+  t.tests     = JAVA_TEST_FILES
+end
+task :test => [ :test_compile ]
+
+Rake::JavaDocTask.new do |t|
+  t.sourcepath = SOURCE_DIR
+  t.package = "jerbil"
+  t.dstdir = JAVADOC_DIR
+end
+task :javadoc => [ :compile ]
+
+Rake::JarTask.new do |t|
+  t.dir = JAVA_BUILD_DIR
+  t.filename = DISTJAR
+end
+task :jar => [ :clean, :compile ]
+
+
+file ANNOTATED_CLASSES => [:find_annotations]
+desc "find annotations and write output to #{ANNOTATED_CLASSES}"
+Rake::AptTask.new(:find_annotations) do |t|
+  t.java_files= JAVA_FILES
+  t.find_annotation 'jerbil.sample.MyAnnotation' do |classes|
+    File.open(ANNOTATED_CLASSES, 'w') { |f| f << classes.to_yaml }
+  end
+end
+task :find_annotations => [ :compile ]
+
+task :clean do |t|
+  RakeFileUtils.verbose(false) do
+    rm_rf BUILD_DIR
+    rm_rf DIST_DIR
+  end
+end
+

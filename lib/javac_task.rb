@@ -10,14 +10,14 @@ module Rake
     attr_accessor :java_files
     attr_accessor :dependencies
     attr_accessor :nowarn
-    #attr_accessor :verbose
+    attr_accessor :verbose
 
     
     def initialize(name)
       @name = name
       @dependencies = []     
       @nowarn = false
-      #@verbose = false
+      @verbose = false
       @extraargs = []
       yield self if block_given?
       dependencies << java_files.dstdir
@@ -39,13 +39,12 @@ module Rake
         # due to known javac bug 6198196 - http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6198196
         # $IS_WINDOWS is defined in the java_helper file - bit icky, I know, but it works
         java_files.gsub!( "/", "\\" ) if $IS_WINDOWS
-        
-        
+               
         parms += @extraargs
         parms += java_files      
              
-        require 'pp'
-        pp parms
+        #require 'pp'
+        #pp parms
         
         ret = 0
         javacout = printWriter_to_s do |pw|
@@ -59,9 +58,7 @@ module Rake
     end
   
     
-    def method_missing(symbol, *args)
-      puts "#{symbol} / #{args}"
-      puts args.class
+    def method_missing(symbol, *args)   
       arg = symbol.to_s.sub(/=/, "")
       @extraargs << "-#{arg}"
       @extraargs += args
