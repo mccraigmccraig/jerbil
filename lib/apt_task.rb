@@ -4,11 +4,6 @@ require File.dirname(__FILE__) + '/java_helper'
 require File.dirname(__FILE__) + '/javac_task'
 
 # Apt helper class - uses annotation processor API to identify annotations.
-#	Based on
-#	http://weblogs.java.net/blog/ss141213/archive/2005/12/how_to_automati.html
-#   TODO: wrap compile/processing step in one?
-
-
 module Rake
   class AptTask < JavacTask
 
@@ -87,7 +82,7 @@ module Rake
     end
     
     def post_compile
-      super
+      super unless nocompile
       @found_annotations.each do |name, types|
         handler = @found_annotations_handler[name]        
         handler.call(types) unless handler.nil?

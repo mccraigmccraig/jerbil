@@ -88,6 +88,38 @@ module JavaHelper
   end
 end
 
+module ExtraArgumentTaking
+    attr_reader :extra_args
+      
+    def self.append_features(base)
+      super    
+      class << base
+        def create_alias_for(actual, new)
+          @@aliases ||= {}
+          @@aliases[new.to_s] = actual.to_s         
+        end     
+      end
+    end
+    
+    def options(*args)
+      args.each {|a| self.send(a)}
+    end
+    
+    def add_files(files)
+      @extra_args += files.to_a
+    end
+    
+    def method_missing(symbol, *args)   
+      arg = symbol.to_s.sub(/=/, "")
+      @extra_args ||= []      
+      if @@aliases && @@aliases.has_key?(arg)   
+        arg = @@aliases[arg]  
+      end
+      
+      @extra_args << "-#{arg}"
+      @extra_args += args
+    end
+end
 
 class FileList  
   def to_cp  

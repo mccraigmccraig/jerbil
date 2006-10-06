@@ -4,35 +4,28 @@ require File.dirname(__FILE__) + '/java_helper'
 
 module Rake
   class JavacTask < TaskLib
-    include JavaHelper
+    include JavaHelper, ExtraArgumentTaking
     
     attr_accessor :name
     attr_accessor :java_files
-    attr_accessor :dependencies
-    attr_accessor :nowarn
     attr_accessor :verbose
 
+    create_alias_for :g, :debug
     
     def initialize(name)
       @name = name
-      @dependencies = []     
-      @nowarn = false
       @verbose = false
-      @extraargs = []
       yield self if block_given?
-      dependencies << java_files.dstdir
       define     
     end
     
     def define
-	  desc "compile files in #{java_files.srcdir.to_a.join(', ')}" if Rake.application.last_comment.nil?
-      #task name => dependencies + [ *java_files ] do |t|
-      task name => dependencies do |t|
+	    desc "compile files in #{java_files.srcdir.to_a.join(', ')}" if Rake.application.last_comment.nil?     
+      task name => java_files.dstdir do |t|
           
-        parms = [ "-d", java_files.dstdir ]
+        parms  = [ "-d", java_files.dstdir ]
         parms += [ "-sourcepath", java_files.sourcepath ] unless java_files.sourcepath.nil? 
         
-        parms << "-nowarn" if nowarn
         parms << "-verbose" if verbose
         
         # must do this to prevent javac bombing out on the file package-info.java
@@ -40,30 +33,20 @@ module Rake
         # $IS_WINDOWS is defined in the java_helper file - bit icky, I know, but it works
         java_files.gsub!( "/", "\\" ) if $IS_WINDOWS
                
-        parms += @extraargs
+        parms += extra_args unless extra_args.nil?
         parms += java_files      
-             
-        #require 'pp'
-        #pp parms
-        
+         
         ret = 0
         javacout = printWriter_to_s do |pw|
           ret = compile(parms, pw)
         end
-
+    
         raise "Compile error:\n#{javacout}" unless ret == 0        
         post_compile
       end
       directory java_files.dstdir
     end
   
-    
-    def method_missing(symbol, *args)   
-      arg = symbol.to_s.sub(/=/, "")
-      @extraargs << "-#{arg}"
-      @extraargs += args
-    end
-    
     protected    
     def post_compile
       copy_resources

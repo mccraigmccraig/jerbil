@@ -6,12 +6,11 @@ module Rake
   class JibxTask < TaskLib
     include JavaHelper
     
-    attr_accessor :bindings, :name, :dependencies, :verbose, :classpath
+    attr_accessor :bindings, :name, :verbose, :classpath
  
     def initialize(name=:jibx)
       @name = name
-      @verbose = false
-      @dependencies = []
+      @verbose = false    
       @classpath = []
       yield self if block_given?
       define     

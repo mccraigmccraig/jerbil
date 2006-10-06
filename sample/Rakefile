@@ -11,6 +11,9 @@ task :default => :compile
 desc "compile all java files"
 Rake::JavacTask.new(:compile) do |jct|
   jct.java_files = JAVA_FILES
+  jct.options :nowarn, :debug
+  jct.source = "1.5"
+  jct.target = "1.5" 
 end
 
 desc "compile all tests"
@@ -28,8 +31,9 @@ task :test => [ :test_compile ]
 
 Rake::JavaDocTask.new do |t|
   t.sourcepath = SOURCE_DIR
-  t.package = "jerbil"
+  t.subpackages = "jerbil"
   t.dstdir = JAVADOC_DIR
+  t.options :quiet  
 end
 task :javadoc => [ :compile ]
 
@@ -48,6 +52,7 @@ task :run => [ :compile ]
 desc "find annotations and write output to #{ANNOTATED_CLASSES}"
 Rake::AptTask.new(:find_annotations) do |t|
   t.java_files= JAVA_FILES
+  t.nocompile = true
   t.find_annotation 'jerbil.sample.MyAnnotation' do |classes|
     File.open(ANNOTATED_CLASSES, 'w') { |f| f << classes.to_yaml }
   end
