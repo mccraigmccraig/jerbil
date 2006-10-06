@@ -62,10 +62,10 @@ module Rake
     def copy_resources
       java_files.resources_and_target do |res, target|
         directory = File.dirname(target)
-        #mkdir_p directory, :verbose=>verbose unless File.directory?(directory)
-        #cp res, target, :verbose=>verbose unless uptodate?(target,res)
-        mkdir_p directory unless File.directory?(directory)
-        cp res, target unless uptodate?(target,res)
+        RakeFileUtils.verbose(verbose) do      
+          mkdir_p directory unless File.directory?(directory)
+          cp res, target unless uptodate?(target,res)
+        end
       end
     end
   end 
