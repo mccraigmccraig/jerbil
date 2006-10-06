@@ -10,14 +10,15 @@ module Rake
     attr_accessor :java_files
     attr_accessor :dependencies
     attr_accessor :nowarn
-    attr_accessor :verbose
+    #attr_accessor :verbose
 
     
     def initialize(name)
       @name = name
       @dependencies = []     
       @nowarn = false
-      @verbose = false
+      #@verbose = false
+      @extraargs = []
       yield self if block_given?
       dependencies << java_files.dstdir
       define     
@@ -39,10 +40,12 @@ module Rake
         # $IS_WINDOWS is defined in the java_helper file - bit icky, I know, but it works
         java_files.gsub!( "/", "\\" ) if $IS_WINDOWS
         
+        
+        parms += @extraargs
         parms += java_files      
              
-        #require 'pp'
-        #pp parms
+        require 'pp'
+        pp parms
         
         ret = 0
         javacout = printWriter_to_s do |pw|
@@ -55,6 +58,15 @@ module Rake
       directory java_files.dstdir
     end
   
+    
+    def method_missing(symbol, *args)
+      puts "#{symbol} / #{args}"
+      puts args.class
+      arg = symbol.to_s.sub(/=/, "")
+      @extraargs << "-#{arg}"
+      @extraargs += args
+    end
+    
     protected    
     def post_compile
       copy_resources
@@ -68,8 +80,10 @@ module Rake
     def copy_resources
       java_files.resources_and_target do |res, target|
         directory = File.dirname(target)
-        mkdir_p directory, :verbose=>verbose unless File.directory?(directory)
-        cp res, target, :verbose=>verbose unless uptodate?(target,res)
+        #mkdir_p directory, :verbose=>verbose unless File.directory?(directory)
+        #cp res, target, :verbose=>verbose unless uptodate?(target,res)
+        mkdir_p directory unless File.directory?(directory)
+        cp res, target unless uptodate?(target,res)
       end
     end
   end 
