@@ -11,6 +11,8 @@ end
 $JAVA_DEBUG = RUBY_PLATFORM =~ /darwin/i || false
 $IS_WINDOWS = RUBY_PLATFORM =~ /mswin|mingw/i
 $JAVA_PATH_SEPERATOR = $IS_WINDOWS ? ';' : ':'
+$DIR_SEP = $IS_WINDOWS ? "\\" : "/"
+$DIR_SEP_FOR_SUBSTITUTION = $IS_WINDOWS ? "\\\\" : "/"
 
 module JavaHelper
   def printStream_to_s(&block)
@@ -153,11 +155,18 @@ class JavaFileList < Rake::FileList
   end
   
   def to_classnames
-	  self.pathmap("%{^#{srcdir}/,}X").gsub("/", ".")
+	# remove the initial directory and separator
+	sub = srcdir + $DIR_SEP_FOR_SUBSTITUTION
+	paths = self.pathmap("%{^#{sub},}X")
+	
+	paths.gsub!($DIR_SEP, ".")
+	paths.gsub!("/", "." )
   end
   
   def to_classes
-    to_classnames.map {|name| Rjb::import(name)}.to_a
+    classnames = to_classnames
+    classes = classnames.map {|name| Rjb::import(name)}
+    classes.to_a
   end
   
   def to_classfiles
@@ -187,6 +196,12 @@ class JavaFileList < Rake::FileList
   
   def add_extensions(exts)
     @resource_patterns.concat(exts.to_a)
+  end
+
+  def dump(files)
+	files.each do |f|
+		print f + "\n"
+	end
   end
 end
 
@@ -239,5 +254,12 @@ class MultiJavaFileList
       end
     end
   end
+  
+  def gsub!( replace, replace_with )
+    @java_files.each{ |f| f.gsub!( replace, replace_with ) }
+  end
+  
+  
+
 end
 
