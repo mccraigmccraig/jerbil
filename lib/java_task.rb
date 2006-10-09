@@ -99,7 +99,8 @@ module Rake
           Process.wait
           raise unless $?.exitstatus == 0      
         else
-          exec "java", *parms
+		sh "java", *parms
+		#exec "java", *parms
         end
        
        end

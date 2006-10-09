@@ -38,8 +38,12 @@ module Rake
           tl = Rake::TestNG::TestListener.new
           sl = Rake::TestNG::SuiteListener.new
           
-          testng.addListener(Rjb::bind(tl, 'org.testng.ITestListener'))
-          testng.addListener(Rjb::bind(sl, 'org.testng.ISuiteListener'))
+	  #need to use _invoke because addListener has 3 different method signatures
+	  #using same name and return type
+	  #testng.addListener(Rjb::bind(tl, 'org.testng.ITestListener'))
+	  testng._invoke('addListener', 'Lorg.testng.ITestListener;', Rjb::bind(tl, 'org.testng.ITestListener'))
+	  #testng.addListener(Rjb::bind(sl, 'org.testng.ISuiteListener'))
+	  testng._invoke('addListener', 'Lorg.testng.ISuiteListener;', Rjb::bind(sl, 'org.testng.ISuiteListener'))
           
           if report
             testng.addListener(Rjb::import('org.testng.reporters.SuiteHTMLReporter').new)

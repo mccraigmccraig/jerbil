@@ -51,7 +51,8 @@ class TestBuild < Test::Unit::TestCase
   end
   
   def test_run
-    run_rake(:clean, :run) do    
+    run_rake(:clean, :run) do |ok,res|
+	#res.status		     
     end
   end
   
@@ -73,7 +74,7 @@ class TestBuild < Test::Unit::TestCase
     Dir.chdir("sample") do     
       sh "rake --quiet #{args.join(" ")}" do |ok,res|
         flunk "rake failed: #{res}" unless ok 
-        yield if block_given?     
+        yield(ok, res) if block_given?     
       end
     end
   end
