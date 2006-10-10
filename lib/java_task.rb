@@ -37,6 +37,8 @@ module Rake
      
      attr_accessor :fork
      
+     attr_accessor :in_vm
+     
      def initialize(name, classname)
         @name = name || classname
         @classname = classname
@@ -47,6 +49,7 @@ module Rake
         @max_mem = 1024
         @logging_conf = nil
         @debug = false
+        @in_vm = false
         @debug_port = 8000
         @verbose = false
         @fork = false
@@ -60,6 +63,12 @@ module Rake
         desc description unless description.nil?
         task name => dependencies do |t|
        
+        if in_vm
+          klass = Rjb::import(classname)
+          klass.main(parameters)
+          return
+        end
+        
         if classpath.respond_to?(:to_cp)
           cp = classpath.to_cp
         else
@@ -93,7 +102,12 @@ module Rake
         if @fork
           sh "java", *parms                  
         else          
-          exec "java", *parms
+          begin
+            exec "java", *parms
+          rescue
+            puts "running java with fork==false not supported on Mac OS X!" if RUBY_PLATFORM =~ /darwin/i
+            raise
+          end
         end       
        end
      end

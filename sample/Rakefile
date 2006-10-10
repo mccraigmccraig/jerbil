@@ -49,6 +49,13 @@ Rake::JavaTask.new(:run, "jerbil.sample.Main") do |t|
   t.depends_on :compile
 end
 
+Rake::JavaTask.new(:run_in_vm, "jerbil.sample.Main") do |t|
+  t.classpath = CLASSPATH
+  t.parameters = [ "20", "50" ]
+  t.depends_on :compile
+  t.in_vm = true 
+end
+
 Rake::JavaTask.new(:run_forked, "jerbil.sample.Main") do |t|
   t.classpath = CLASSPATH
   t.parameters = [ "50", "-50" ]

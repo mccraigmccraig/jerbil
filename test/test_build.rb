@@ -59,13 +59,20 @@ class TestBuild < Test::Unit::TestCase
   def test_run_no_fork
     run_rake(:clean, :run) do |ok,res|
       assert !ok
-      assert_equal 70, res.exitstatus
+      assert_equal 70, res.exitstatus, "NB: this test fails on Mac OS X"
     end
   end
   
   def test_run_forked_ok
     run_rake(:clean, :run_forked) do |ok,res|
       assert ok	        
+    end
+  end
+  
+  def test_run_in_vm
+    run_rake(:clean, :run_in_vm) do |ok,res|
+      assert !ok
+      assert_equal 70, res.exitstatus	        
     end
   end
   
