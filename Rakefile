@@ -7,7 +7,7 @@ task :default => :test
 Rake::TestTask.new do |t|
   t.libs << "test"
   t.test_files = FileList['test/test*.rb']
-  t.verbose = true
+  t.verbose = false
 end
 
 
@@ -31,4 +31,23 @@ task :install do |t|
   end  
   
   puts "created sample Rakefile in #{dstfile}"
+end
+
+task :compile_classloader do |t|
+  javac = "javac"
+  retried = false
+  begin
+    Dir.chdir("classloader") do
+      sh %{#{javac} JerbilClassLoader.java}
+    end
+  rescue
+    if ENV['JAVA_HOME'] && !retried
+      javac = File.join(ENV['JAVA_HOME'], "bin", "javac")
+      retried = true 
+      retry
+    end
+      
+    $stderr << "Make sure javac is in your PATH, or set JAVA_HOME"
+    raise
+  end
 end

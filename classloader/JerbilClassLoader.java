@@ -8,13 +8,20 @@ import java.io.InputStream;
  * TODO: comment
  */
 public class JerbilClassLoader extends ClassLoader {
+  
+    private static final boolean debug = Boolean.getBoolean( "jerbil.debug" );
+    
     public JerbilClassLoader(ClassLoader parent) {
         super( parent );
     }
 
     public Class<?> findClass(String name) throws
             ClassNotFoundException {
-        //System.err.println( "findClass(" + name + ")" );
+              
+        if (debug) {
+          System.err.println( "findClass(" + name + ")" );
+        }
+        
         byte[] classBytes = findClassBytes( name );
         return defineClass( name, classBytes,
                 0, classBytes.length );
@@ -63,6 +70,4 @@ public class JerbilClassLoader extends ClassLoader {
             }
         }
     }
-
-
 }

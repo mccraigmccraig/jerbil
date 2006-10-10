@@ -3,64 +3,58 @@ require 'rake/tasklib'
 
 module Rake
   class JavaTask < TaskLib
-         
+     include ExtraArgumentTaking
+     
      # Name for task
      attr_accessor :name
   
      # Class to run
      attr_accessor :classname
      
-     attr_accessor :description
-     
      # program args
      attr_accessor :parameters
-     
-     # vm args
-     attr_accessor :vmargs
-     
-     attr_accessor :profile
-     
-     attr_accessor :yourkit_args 
-     attr_accessor :yourkit_platform
-     
+         
      attr_accessor :classpath
-     attr_accessor :max_mem
-     
-     attr_accessor :logging_conf
-     
-     attr_accessor :debug
-     attr_accessor :debug_port
-     
-     attr_accessor :verbose
-     
-     attr_accessor :dependencies
-     
-     attr_accessor :fork
-     
+                    
+     attr_accessor :fork     
      attr_accessor :in_vm
      
      def initialize(name, classname)
         @name = name || classname
         @classname = classname
         @parameters = []
-        @classpath = "."
-        @yourkit_args = ["-agentlib:yjpagent=port=10001"]
-        @yourkit_platform = "linux-x86-32"
-        @max_mem = 1024
-        @logging_conf = nil
-        @debug = false
+        @classpath = "."              
         @in_vm = false
-        @debug_port = 8000
-        @verbose = false
-        @fork = false
-        @vmargs = []
-        @dependencies = [ :compile ]
+        @fork = false   
         yield self if block_given?
         define
      end
+       
+     def yourkit(port=1001, platform="linux-x86-32")
+        add_extra_args "-agentlib:yjpagent=port=#{port}"
+        ENV['LD_LIBRARY_PATH'] = ":./lib/yourkit/#{platform}"
+     end
      
+     def sys_property(name,value)
+        add_extra_args "-D#{name}=#{value}"
+     end
+     
+     def logging_conf=(file)
+        sys_property("java.util.logging.config.file", file)
+     end
+     
+     def max_mem=(mem)
+        add_extra_args "-Xmx#{mem}M"
+     end
+     
+     def debug(port=8000, suspend="n")
+        add_extra_args "-Xdebug", "-Xnoagent",
+          "-Xrunjdwp:transport=dt_socket,address=#{port},server=y,suspend=#{suspend}"
+     end
+     
+     protected
      def define
-        desc description unless description.nil?
+        #desc "run #{classname}" if Rake.application.last_comment.nil?      
         task name => dependencies do |t|
        
         if in_vm
@@ -75,32 +69,16 @@ module Rake
           cp = classpath.to_s
         end
         
-        parms = [ "-cp", cp, "-Xmx#{max_mem}M" ]
-        parms += vmargs
-        
-        unless logging_conf.nil?
-          parms << "-Djava.util.logging.config.file=#{logging_conf}"
-        end
-        
-        if profile
-          parms += yourkit_args 
-          ENV['LD_LIBRARY_PATH'] = ":./lib/yourkit/#{yourkit_platform}"
-        end
-        
-        if debug
-          parms += [
-            "-Xdebug",
-            "-Xnoagent",
-            "-Xrunjdwp:transport=dt_socket,address=#{debug_port},server=y,suspend=n" ]
-        end
-        
+        parms = [ "-cp", cp ]
+        parms += extra_args unless extra_args.nil?
+               
         parms << classname
         parms += parameters
-        
-        puts "java #{parms.join(' ')}" if verbose
-        
+                      
         if @fork
-          sh "java", *parms                  
+          RakeFileUtils.verbose(verbose) do 
+            sh "java", *parms
+          end
         else          
           begin
             exec "java", *parms

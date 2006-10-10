@@ -38,6 +38,9 @@ module Rake
         parms += extra_args unless extra_args.nil?
         parms += java_files      
          
+        #require 'pp'
+        #pp parms
+        
         ret = 0
         javacout = printWriter_to_s do |pw|
           ret = compile(parms, pw)

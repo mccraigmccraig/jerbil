@@ -9,21 +9,21 @@ require 'sample/buildconfig'
 
 class TestBuild < Test::Unit::TestCase
   def test_compile
-    run_rake(:clean, :compile) do |ok,res|
+    run_rake_clean(:compile) do |ok,res|
       assert ok
       assert_files_exist(JAVA_FILES.to_classfiles)
     end
   end
   
   def test_javadoc
-    run_rake(:clean, :javadoc) do |ok,res|
+    run_rake_clean(:javadoc) do |ok,res|
       assert ok
       assert File.exists?(File.join(JAVADOC_DIR, "index.html"))
     end
   end
   
   def test_test_compile
-    run_rake(:clean, :test_compile) do |ok,res|
+    run_rake_clean(:test_compile) do |ok,res|
       assert ok
       assert_files_exist(JAVA_FILES.to_classfiles)
       assert_files_exist(JAVA_TEST_FILES.to_classfiles)
@@ -31,14 +31,14 @@ class TestBuild < Test::Unit::TestCase
   end
   
   def test_jar
-    run_rake(:clean, :jar) do |ok,res|
+    run_rake_clean(:jar) do |ok,res|
       assert ok
       assert File.exists?(DISTJAR)
     end
   end
   
   def test_test
-    run_rake(:clean, :test) do |ok,res|
+    run_rake_clean(:test) do |ok,res|
       assert ok
       assert File.directory?(TESTOUTPUTDIR)
       assert File.exists?(File.join(TESTOUTPUTDIR, "Command line suite", "index.html"))
@@ -46,7 +46,7 @@ class TestBuild < Test::Unit::TestCase
   end
   
   def test_find_annotations
-    run_rake(:clean, :find_annotations) do |ok,res|
+    run_rake_clean(:find_annotations) do |ok,res|
       assert ok
       assert File.exists?(ANNOTATED_CLASSES)
       classes = YAML.load_file(ANNOTATED_CLASSES)
@@ -57,34 +57,35 @@ class TestBuild < Test::Unit::TestCase
   end
   
   def test_run_no_fork
-    run_rake(:clean, :run) do |ok,res|
+    run_rake_clean(:run) do |ok,res|
       assert !ok
       assert_equal 70, res.exitstatus, "NB: this test fails on Mac OS X"
     end
   end
   
   def test_run_forked_ok
-    run_rake(:clean, :run_forked) do |ok,res|
+    run_rake_clean(:run_forked) do |ok,res|
       assert ok	        
     end
   end
   
   def test_run_in_vm
-    run_rake(:clean, :run_in_vm) do |ok,res|
+    run_rake_clean(:run_in_vm) do |ok,res|
       assert !ok
       assert_equal 70, res.exitstatus	        
     end
   end
   
   def test_run_forked_fail
-    run_rake(:clean, :run_forked_fail) do |ok,res|
+    run_rake_clean(:run_forked_fail) do |ok,res|
       assert !ok	    
       assert_equal 1, res.exitstatus 
     end
   end
   
   def test_clean
-    run_rake(:clean, :compile, :jar, :test)
+    run_rake_clean(:jar) 
+    
     run_rake(:clean) do |ok,res|
       assert ok
       assert !File.directory?(TESTOUTPUTDIR)  
@@ -93,9 +94,24 @@ class TestBuild < Test::Unit::TestCase
     end
   end
   
+  def test_test_java_task
+    run_rake(:clean, :test_java_task)
+  end
+  
   private
   def assert_files_exist(files)
     files.each {|f| assert File.exists?(f)}
+  end
+  
+  # runs rake clean in a separate process to 
+  # detect classloader problems
+  def run_rake_clean(*args)  
+    run_rake(:clean) 
+    if block_given?
+      run_rake(args) { |ok,res| yield ok,res }
+    else 
+      run_rake(args)
+    end
   end
   
   def run_rake(*args, &block)
@@ -103,9 +119,8 @@ class TestBuild < Test::Unit::TestCase
       #sh "rake --quiet #{args.join(' ')}" do |ok,res|
       cmd = args.join(" ")
       #on windows, exec invokes a subshell which does not inherit environment variables,
-      #therefore we cannot invoke rake directly
-      
-      unless block_given?
+      #therefore we cannot invoke rake directly      
+      unless block_given?      
         block = lambda {|ok,res| flunk "rake failed: #{res}" unless ok }
       end
       

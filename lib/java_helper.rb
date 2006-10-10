@@ -3,7 +3,8 @@ begin
 	require 'rake'
 rescue LoadError
 	require 'rubygems'
-	retry
+	require 'rjb'
+	require 'rake'
 end
 
 # for some really weird reasons schemaexport fails on mac os x
@@ -42,7 +43,6 @@ module JavaHelper
     l
   end
   
-  
   def serialize(obj)
     byteoos = Rjb::import('java.io.ByteArrayOutputStream').new
     oosKlass = Rjb::import('java.io.ObjectOutputStream')
@@ -78,9 +78,11 @@ module JavaHelper
     #puts "lib:" + ENV['LD_LIBRARY_PATH']
     #jvmargs << "-Djava.library.path=#{ENV['JAVA_HOME']}/jre/lib/i386"
     
-    jvmargs += [ "-Djava.system.class.loader=JerbilClassLoader", 
-      "-Dbuild.root=#{build_dir}" ] unless build_dir.nil?
-    
+    if build_dir
+        jvmargs += [ "-Djava.system.class.loader=JerbilClassLoader", 
+        "-Dbuild.root=#{build_dir}", "-Djerbil.debug=false" ] 
+    end
+        
     begin
     	Rjb::load(classpath.to_cp, jvmargs)
     rescue 
@@ -90,36 +92,38 @@ module JavaHelper
   end
 end
 
-module ExtraArgumentTaking
-    attr_reader :extra_args
-      
+module ExtraArgumentTaking      
     def self.append_features(base)
-      super    
-      class << base
+      super         
+      class << base        
         def create_alias_for(actual, new)
           @@aliases ||= {}
           @@aliases[new.to_s] = actual.to_s         
         end     
       end
     end
+      
+    attr_reader :extra_args
     
     def options(*args)
       args.each {|a| self.send(a)}
     end
     
     def add_files(files)
-      @extra_args += files.to_a
+      add_extra_args files.to_a
     end
-    
+          
+    def add_extra_args(*args)
+      @extra_args = [] if extra_args.nil?
+      @extra_args += args.flatten
+    end
+           
     def method_missing(symbol, *args)   
       arg = symbol.to_s.sub(/=/, "")
-      @extra_args ||= []      
       if @@aliases && @@aliases.has_key?(arg)   
         arg = @@aliases[arg]  
       end
-      
-      @extra_args << "-#{arg}"
-      @extra_args += args
+      add_extra_args "-#{arg}", args
     end
 end
 
@@ -258,8 +262,5 @@ class MultiJavaFileList
   def gsub!( replace, replace_with )
     @java_files.each{ |f| f.gsub!( replace, replace_with ) }
   end
-  
-  
-
 end
 
