@@ -91,18 +91,10 @@ module Rake
         puts "java #{parms.join(' ')}" if verbose
         
         if @fork
-          ret = Kernel.fork { 
-            exec "java", *parms
-          }
-           
-          exit! if ret.nil?
-          Process.wait
-          raise unless $?.exitstatus == 0      
-        else
-		sh "java", *parms
-		#exec "java", *parms
-        end
-       
+          sh "java", *parms                  
+        else          
+          exec "java", *parms
+        end       
        end
      end
   end

@@ -45,8 +45,22 @@ end
 
 Rake::JavaTask.new(:run, "jerbil.sample.Main") do |t|
   t.classpath = CLASSPATH
-  t.parameters = [ "50", "50" ]
+  t.parameters = [ "20", "50" ]
   t.depends_on :compile
+end
+
+Rake::JavaTask.new(:run_forked, "jerbil.sample.Main") do |t|
+  t.classpath = CLASSPATH
+  t.parameters = [ "50", "-50" ]
+  t.depends_on :compile
+  t.fork = true
+end
+
+Rake::JavaTask.new(:run_forked_fail, "jerbil.sample.Main") do |t|
+  t.classpath = CLASSPATH
+  t.parameters = [ "0", "20" ]
+  t.depends_on :compile
+  t.fork = true
 end
 
 desc "find annotations and write output to #{ANNOTATED_CLASSES}"

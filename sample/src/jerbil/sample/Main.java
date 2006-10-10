@@ -14,6 +14,6 @@ public class Main {
             sum = j.add(Integer.parseInt(a), sum);
         }
 
-        System.exit(sum == 100 ? 0 : 1);
+        System.exit(sum);
     }
 }
