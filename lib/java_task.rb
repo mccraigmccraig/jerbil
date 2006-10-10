@@ -66,7 +66,7 @@ module Rake
           cp = classpath.to_s
         end
         
-        parms = [ "-cp", cp, "-Xmx#{max_mem}M", "-server" ]
+        parms = [ "-cp", cp, "-Xmx#{max_mem}M" ]
         parms += vmargs
         
         unless logging_conf.nil?

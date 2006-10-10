@@ -71,8 +71,13 @@ class TestBuild < Test::Unit::TestCase
   end
   
   def run_rake(*args)
-    Dir.chdir("sample") do     
-      sh "rake --quiet #{args.join(" ")}" do |ok,res|
+    Dir.chdir("sample") do
+      #sh "rake --quiet #{args.join(' ')}" do |ok,res|
+      cmd = args.join(" ")
+      #on windows, exec invokes a subshell which does not inherit environment variables,
+      #therefore we cannot invoke directly
+      ruby %{-rubygems -e "require 'rake'; Rake.application.run" #{cmd} --quiet} do |ok,res|
+      	flunk "could not invoke rake" if res.nil?
         flunk "rake failed: #{res}" unless ok 
         yield(ok, res) if block_given?     
       end
