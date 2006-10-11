@@ -17,8 +17,7 @@ module Rake
       @found_annotations_handler = {}
       super
     end
-    
-    
+        
     def supportedOptions
       empty_list
     end
@@ -73,7 +72,12 @@ module Rake
       @found_annotations_handler[annotation] = handler
     end
     
-    
+    def annotated_classes_to_yaml(annotation, filename)
+      find_annotation annotation do |classes|
+        File.open(filename, 'w') { |f| f << classes.to_a.uniq.to_yaml }
+      end
+    end
+        
     protected   
     def compile(parameters, printwriter)
       apt = Rjb::import('com.sun.tools.apt.Main')

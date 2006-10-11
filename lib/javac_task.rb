@@ -35,7 +35,7 @@ module Rake
         # $IS_WINDOWS is defined in the java_helper file - bit icky, I know, but it works
         java_files.gsub!( "/", "\\" ) if $IS_WINDOWS
                
-        parms += extra_args unless extra_args.nil?
+        parms += extra_args.collect {|a|a.to_s} unless extra_args.nil?
         parms += java_files      
          
         #require 'pp'
