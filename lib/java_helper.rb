@@ -20,6 +20,7 @@ module JavaHelper
     yieldIO('java.io.PrintStream', block)
   end
  
+  # 
   def printWriter_to_s(&block)
     yieldIO('java.io.PrintWriter', block)
   end
@@ -33,6 +34,7 @@ module JavaHelper
     String.new(st.toString)
   end
   
+  # returns an empty list
   def empty_list
     Rjb::import('java.util.ArrayList').new
   end
@@ -92,6 +94,10 @@ module JavaHelper
   end
 end
 
+# Tasks including this module can specifiy additional
+# java style arguments.
+# 
+#
 module ExtraArgumentTaking      
     def self.append_features(base)
       super         

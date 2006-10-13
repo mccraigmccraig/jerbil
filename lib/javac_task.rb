@@ -2,7 +2,16 @@ require 'rake'
 require 'rake/tasklib'
 require File.dirname(__FILE__) + '/java_helper'
 
+
+
 module Rake
+  # == Example
+  #
+  #  desc "compile all java files"
+  #  Rake::JavacTask.new(:compile) do |t|
+  #    t.java_files = JAVA_FILES
+  #    t.options :nowarn, :debug
+  #  end
   class JavacTask < TaskLib
     include JavaHelper, ExtraArgumentTaking
     
