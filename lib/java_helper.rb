@@ -16,16 +16,21 @@ $DIR_SEP = $IS_WINDOWS ? "\\" : "/"
 $DIR_SEP_FOR_SUBSTITUTION = $IS_WINDOWS ? "\\\\" : "/"
 
 module JavaHelper
-  def printStream_to_s(&block)
+
+  # Provides the block with an instance of java.io.PrintStream and returns
+  # all text printed to it as ruby-typed string.
+  def printStream_to_s(&block) # :yields: printstream
     yieldIO('java.io.PrintStream', block)
   end
  
-  # 
-  def printWriter_to_s(&block)
+  
+  # Provides the block with an instance of java.io.PrintWriter and returns
+  # all text printed to it as ruby-typed string.
+  def printWriter_to_s(&block) # :yields: printwriter
     yieldIO('java.io.PrintWriter', block)
   end
   
-  def yieldIO(klass, block)
+  def yieldIO(klass, block) # :nodoc:
     out = Rjb::import('java.io.ByteArrayOutputStream').new
     ps = Rjb::import(klass.to_s).new_with_sig 'Ljava.io.OutputStream;', out    
     block.call(ps)
@@ -34,7 +39,7 @@ module JavaHelper
     String.new(st.toString)
   end
   
-  # returns an empty list
+  # Returns an empty instance of <em>java.util.List</em>.
   def empty_list
     Rjb::import('java.util.ArrayList').new
   end
