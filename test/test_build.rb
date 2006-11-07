@@ -2,7 +2,7 @@
 
 $:.unshift File.join( File.dirname(__FILE__), "..", "lib" )
 
-require 'java_helper'
+require 'jerbil/java_helper'
 require 'test/unit'
 require 'yaml'
 require 'sample/buildconfig'

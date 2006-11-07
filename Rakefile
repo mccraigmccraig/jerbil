@@ -46,13 +46,13 @@ spec = Gem::Specification.new do |s|
   s.required_ruby_version = '>= 1.8.2'
   s.summary = 'Jerbil java build system'
   s.name = 'jerbil'
-  s.homepage = 'http://www2.trampolinesystems.com/code/jerbil'
+  s.homepage = 'http://code.trampolinesystems.com/jerbil'
   s.version = read_version
   s.add_dependency('rjb', '>= 1.0')
   s.require_path = 'lib'
   s.requirements << 'rjb'
   s.requirements << 'JDK 5.0'
-  files = FileList['lib/*.rb', 'samples/**/*', 
+  files = FileList['lib/*.rb', 'lib/jerbil/*.rb', 'samples/**/*', 
                    'test/*.rb', 'classloader/*' 'COPYING', 'ChangeLog', 'README']
   
   s.files = files

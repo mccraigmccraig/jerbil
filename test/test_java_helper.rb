@@ -3,7 +3,7 @@
 $:.unshift File.join( File.dirname(__FILE__), "..", "lib" )
 
 require 'test/unit'
-require 'java_helper'
+require 'jerbil/java_helper'
 
 class TestJavaHelper < Test::Unit::TestCase
 	def test_to_classfiles

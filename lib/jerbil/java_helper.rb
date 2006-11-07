@@ -66,8 +66,12 @@ module JavaHelper
     #need verbose java exceptions
     $VERBOSE = true
     #include build jars and custom classloader
-    classpath.include(File.join(File.dirname(__FILE__), "../buildsupport/*.jar"))
-    classpath.include(File.join(File.dirname(__FILE__), "../classloader")) unless build_dir.nil?
+    
+    java_home = ENV['JAVA_HOME']
+    classpath.include(File.join(java_home, "lib", "tools.jar")) if java_home
+    
+    classpath.include(File.join(File.dirname(__FILE__), "../../buildsupport/*.jar"))
+    classpath.include(File.join(File.dirname(__FILE__), "../../classloader")) unless build_dir.nil?
     
     jvmargs = []    
     jvmargs << "-Djava.util.logging.config.file=#{loggingprops.to_s}" unless loggingprops.nil? 
@@ -96,6 +100,8 @@ module JavaHelper
 	    $stderr << "could not load java vm: make sure JAVA_HOME is set correctly!\n"
       raise
     end
+    
+    #TODO: test javac main and raise if not found
   end
 end
 
