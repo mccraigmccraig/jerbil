@@ -1,5 +1,7 @@
+$:.unshift File.join( File.dirname(__FILE__),  "..", "lib" )
+
 require 'rake'
-Dir[File.join(Rake.original_dir, "..", "lib", "*.rb")].each {|f| require f}
+require 'jerbil'
 require 'buildconfig'
 
 include JavaHelper

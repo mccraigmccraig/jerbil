@@ -62,14 +62,14 @@ module JavaHelper
     byteoos.toByteArray
   end
   
-  def load_vm(classpath, loggingprops = nil, build_dir = nil ) 
+  def load_vm(classpath, build_dir = nil, loggingprops = nil ) 
     #need verbose java exceptions
     $VERBOSE = true
-    #include build jars and custom classloader
-    
+  
+    #include tools.jar from JDK (needed for javac etc.)
     java_home = ENV['JAVA_HOME']
-    classpath.include(File.join(java_home, "lib", "tools.jar")) if java_home
-    
+    classpath.include(File.join(java_home, "lib", "tools.jar")) if java_home    
+    #include build jars and custom classloader
     classpath.include(File.join(File.dirname(__FILE__), "../../buildsupport/*.jar"))
     classpath.include(File.join(File.dirname(__FILE__), "../../classloader")) unless build_dir.nil?
     
@@ -90,17 +90,19 @@ module JavaHelper
     #jvmargs << "-Djava.library.path=#{ENV['JAVA_HOME']}/jre/lib/i386"
     
     if build_dir
-        jvmargs += [ "-Djava.system.class.loader=JerbilClassLoader", 
-        "-Dbuild.root=#{build_dir}", "-Djerbil.debug=false" ] 
+      jvmargs += [ "-Djava.system.class.loader=JerbilClassLoader", 
+        "-Djerbil.build.root=#{build_dir.to_a.join(':')}", "-Djerbil.debug=false" ] 
+    else      
+      $stderr << "jerbil: build_dir not set: dynamic classloading is disabled\n" if Rake.application.options.trace
     end
-        
+         
     begin
     	Rjb::load(classpath.to_cp, jvmargs)
     rescue 
 	    $stderr << "could not load java vm: make sure JAVA_HOME is set correctly!\n"
       raise
     end
-    
+   
     #TODO: test javac main and raise if not found
   end
 end
