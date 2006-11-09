@@ -4,9 +4,16 @@ require 'set'
 require File.dirname(__FILE__) + '/java_helper'
 
 
-module Rake 
-  module HibernateFoo 
-    class ExportSchemaTask < TaskLib
+module Jerbil 
+  module Hibernate 
+    # Generate a sql schema from EJB3-annotated classes.
+    #
+    # == Example
+    #   Jerbil::Hibernate::ExportSchemaTask.new(:export_schema) do |t|
+    #       t.schemafile = "schema.sql"
+    #       t.persistencefile = PERSISTENCE_YML      
+    #   end
+    class ExportSchemaTask < Rake::TaskLib
       include JavaHelper
       
       attr_accessor :name
@@ -59,9 +66,13 @@ module Rake
           
           File.open(schemafile, "w") {|file| file << schema }
         end
+        file schemafile => name
+        task name => persistencefile
       end  
     end
   
+    # Turns the hibernate sql output into something readable. Only tested
+    # with the mysql dialect.
     class SqlBeautifier
       def SqlBeautifier.beautify(sql)
         newsql = ""
@@ -90,6 +101,7 @@ module Rake
       end
      end
      
+     # Wrapper class around _org.hibernate.tool.hbm2ddl.SchemaExport_.
      class SchemaExporter
        def initialize(classes, outputfile, dialect, package=nil)
           @exporter = SchemaExporter.get_schema_exporter(classes, dialect, package)
@@ -122,7 +134,7 @@ module Rake
           acfg.addAnnotatedClass(clazz)
           
           pkg = clazz.getPackage
-          packages << pkg.getName if pkg.getAnnotations.length > 0
+          packages << pkg.getName if pkg && pkg.getAnnotations.length > 0
         end
         packages << package unless package.nil?
         packages.each { |pkg| acfg.addPackage(pkg) }

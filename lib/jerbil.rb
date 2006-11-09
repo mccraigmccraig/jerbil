@@ -1,5 +1,3 @@
-#$:.unshift File.join( File.dirname(__FILE__),  "lib" )
-
 require 'jerbil/java_helper'
 require 'jerbil/javac_task'
 require 'jerbil/java_task'

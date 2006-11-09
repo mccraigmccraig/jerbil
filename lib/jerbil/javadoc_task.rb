@@ -1,11 +1,21 @@
 require 'rake'
 require 'rake/tasklib'
 
-module Rake
-  class JavaDocTask < TaskLib
+module Jerbil
+  # A task to create javadoc from source files.
+  # == Example
+  #   Jerbil::JavaDocTask.new do |t|
+  #     t.sourcepath = SOURCE_DIR
+  #     t.subpackages = "jerbil"
+  #     t.dstdir = JAVADOC_DIR
+  #     t.options :quiet  
+  #     t.depends_on :compile
+  #   end
+  class JavaDocTask < Rake::TaskLib
     include ExtraArgumentTaking
     
      attr_accessor :name
+     # Desstionation directory for javadocs.
      attr_accessor :dstdir
           
      def initialize(name = :javadoc)

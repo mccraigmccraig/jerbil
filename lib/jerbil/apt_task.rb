@@ -3,8 +3,23 @@ require 'rake/tasklib'
 require File.dirname(__FILE__) + '/java_helper'
 require File.dirname(__FILE__) + '/javac_task'
 
-# Apt helper class - uses annotation processor API to identify annotations.
-module Rake
+module Jerbil
+
+  # A task using Java's {Annotation Processing Tool}[http://java.sun.com/j2se/1.5.0/docs/guide/apt/]
+  # (apt) to compile (optional) and process annotations found in the class files.
+  #
+  # This task can be used to gather a list of all EJB3 entities, or testng annotated classes
+  # during the compile step.
+  #
+  # == Example
+  #
+  #  desc "compile all java files and find annotations"
+  #  Jerbil::AptTask.new(:compile) do |t|
+  #    t.java_files = Jerbil::JavaFileList.new("src", "classes")
+  #    t.find_annotation 'javax.persistence.Entity' do |entities|
+  #       File.open(ANNOTATED_CLASSES, 'w') { |f| f << entities.to_yaml }
+  #    end
+  #  end
   class AptTask < JavacTask
 
     attr_accessor :annotations
@@ -18,22 +33,23 @@ module Rake
       super
     end
         
-    def supportedOptions
+    
+    def supportedOptions # :nodoc:
       empty_list
     end
 
-    def supportedAnnotationTypes
+    def supportedAnnotationTypes # :nodoc:
       list = empty_list
       annotations.each_key { |a| list.add a.to_s }
       list
     end
     
-    def getProcessorFor(set,env)
+    def getProcessorFor(set,env) # :nodoc:
       @env = env
       Rjb::bind(self, 'com.sun.mirror.apt.AnnotationProcessor')
     end
     
-    def hashCode
+    def hashCode # :nodoc:
       123456
     end 
     
@@ -45,6 +61,35 @@ module Rake
           puts $!
         end
       end   
+    end
+    
+    # Registers an annotation handler for all annotations with name +annotation+.
+    # Handlers (code blocks) will be invoked after successful compilation, in #post_compile.
+    # See AptTask for an example.
+    def find_annotation(annotation, options={}, &handler)
+      defopts = { :scope => :class }
+      defopts.merge! options
+      annotations[annotation] = Proc.new { |spec|
+           t = spec.getDeclaringType || spec
+           @found_annotations[annotation] ||= []
+           @found_annotations[annotation] << t.toString
+      }
+      @found_annotations_handler[annotation] = handler
+    end
+    
+    # A convenience method to serialize a list of found annotations 
+    # to +filename+ using yaml.
+    def annotated_classes_to_yaml(annotation, filename)
+      find_annotation annotation do |classes|
+        File.open(filename, 'w') { |f| f << classes.to_a.uniq.to_yaml }
+      end
+    end
+        
+    protected   
+    def compile(parameters, printwriter)
+      apt = Rjb::import('com.sun.tools.apt.Main')
+      parameters << "-nocompile" if nocompile
+      apt.process(get_processor_factory, printwriter, parameters )
     end
     
     def check_type(type)
@@ -59,30 +104,6 @@ module Rake
           end      
         end
       end
-    end
-    
-    def find_annotation(annotation, options={}, &handler)
-      defopts = { :scope => :class }
-      defopts.merge! options
-      annotations[annotation] = Proc.new { |spec|
-           t = spec.getDeclaringType || spec
-           @found_annotations[annotation] ||= []
-           @found_annotations[annotation] << t.toString
-      }
-      @found_annotations_handler[annotation] = handler
-    end
-    
-    def annotated_classes_to_yaml(annotation, filename)
-      find_annotation annotation do |classes|
-        File.open(filename, 'w') { |f| f << classes.to_a.uniq.to_yaml }
-      end
-    end
-        
-    protected   
-    def compile(parameters, printwriter)
-      apt = Rjb::import('com.sun.tools.apt.Main')
-      parameters << "-nocompile" if nocompile
-      apt.process(get_processor_factory, printwriter, parameters )
     end
     
     def post_compile

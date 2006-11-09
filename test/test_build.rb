@@ -56,6 +56,13 @@ class TestBuild < Test::Unit::TestCase
     end
   end
   
+  def test_export_schema
+    run_rake_clean(:export_schema) do |ok,res|
+      assert ok
+      assert File.exists?(DB_SCHEMA)
+    end
+  end
+  
   def test_run_no_fork
     run_rake_clean(:run) do |ok,res|
       assert !ok

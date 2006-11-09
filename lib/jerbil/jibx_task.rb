@@ -2,8 +2,15 @@ require 'rake'
 require 'rake/tasklib'
 require File.dirname(__FILE__) + '/java_helper'
 
-module Rake
-  class JibxTask < TaskLib
+module Jerbil
+  # Compiles JIBX bindings.
+  #
+  # == Example
+  #     Jerbil::JibxTask.new do |t|
+  #       t.bindings = FileList[File.join(JAVA_BUILD_DIR, '/**/jibxModelExternalisedBinding.xml')]
+  #       t.classpath = CLASSPATH
+  #     end
+  class JibxTask < Rake::TaskLib
     include JavaHelper
     
     attr_accessor :bindings, :name, :verbose, :classpath

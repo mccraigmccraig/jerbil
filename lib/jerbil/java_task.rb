@@ -1,8 +1,26 @@
 require 'rake'
 require 'rake/tasklib'
 
-module Rake
-  class JavaTask < TaskLib
+module Jerbil
+  # Runs a Java program, either in-vm or as separate process (forked or replacing
+  # current process).
+  #
+  # == Example (forked)
+  #     Jerbil::JavaTask.new(:run, "jerbil.sample.Main") do |t|
+  #       t.classpath = CLASSPATH
+  #       t.parameters = [ "-foo", "baz" ]       
+  #       t.sys_property "jerbil.foo", "baz"
+  #       t.fork = true
+  #       t.depends_on :compile
+  #     end
+  # == Example (in-vm)
+  #     Jerbil::JavaTask.new(:run, "jerbil.sample.Main") do |t|
+  #       t.parameters = [ "-foo", "baz" ]       
+  #       t.in_vm = true     
+  #       t.depends_on :compile
+  #     end
+  
+  class JavaTask < Rake::TaskLib
      include ExtraArgumentTaking
      
      # Name for task
@@ -11,7 +29,7 @@ module Rake
      # Class to run
      attr_accessor :classname
      
-     # program args
+     # Program args
      attr_accessor :parameters
          
      attr_accessor :classpath
@@ -30,11 +48,12 @@ module Rake
         define
      end
        
-     def yourkit(port=1001, platform="linux-x86-32")
+     def yourkit(port=1001, platform="linux-x86-32") # :nodoc:
         add_extra_args "-agentlib:yjpagent=port=#{port}"
         ENV['LD_LIBRARY_PATH'] = ":./lib/yourkit/#{platform}"
      end
      
+     # Adds a system property to the command line.
      def sys_property(name,value)
         add_extra_args "-D#{name}=#{value}"
      end
@@ -43,10 +62,13 @@ module Rake
         sys_property("java.util.logging.config.file", file)
      end
      
+     # The max. amount of memory (in MB) the new Java process is allowed to
+     # take.
      def max_mem=(mem)
         add_extra_args "-Xmx#{mem}M"
      end
      
+     # Runs program in debug mode, listening on port +port+.
      def debug(port=8000, suspend="n")
         add_extra_args "-Xdebug", "-Xnoagent",
           "-Xrunjdwp:transport=dt_socket,address=#{port},server=y,suspend=#{suspend}"

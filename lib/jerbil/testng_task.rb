@@ -3,8 +3,18 @@ require 'rake/tasklib'
 require 'set'
 require File.dirname(__FILE__) + '/java_helper'
 
-module Rake
+module Jerbil
   module TestNG
+    # A Task to run testng tasks.
+    #
+    # == Example
+    #
+    #   Jerbil::TestNG::TestNGTask.new(:test) do |t|
+    #     t.outputdir = TESTOUTPUTDIR
+    #     t.tests     = JAVA_TEST_FILES
+    #     t.depends_on :test_compile
+    #   end
+    #
     class TestNGTask < Rake::TaskLib
       include JavaHelper
       
@@ -35,8 +45,8 @@ module Rake
         task name => dependencies do |t|
           testng = Rjb::import('org.testng.TestNG').new_with_sig 'Z', false
          
-          tl = Rake::TestNG::TestListener.new
-          sl = Rake::TestNG::SuiteListener.new
+          tl = TestListener.new
+          sl = SuiteListener.new
           
           #need to use _invoke because addListener has 3 different method signatures
           #using same name and return type
@@ -74,6 +84,7 @@ module Rake
       end
     end
     
+    # A TestNG test listener imlemented in ruby. It mimics Ruby's standard testrunner.
     class TestListener
       include JavaHelper
 
@@ -122,6 +133,7 @@ module Rake
           $stderr.print "."      
         end
      
+        # Returns a list of all failed classes.
         def failed_to_s
           @failed_classes.to_a.join(', ')   
         end
@@ -143,6 +155,7 @@ module Rake
         end 
       end
       
+      # A Ruby implementation of a TestNG suite listener.
       class SuiteListener
         def onStart(suite)
           #@start = Time.new
@@ -156,6 +169,13 @@ module Rake
     
     
       class << self
+      
+        # Helper method to create a testng xml suite file.
+        # +filename+:: destination file for suite file.
+        # +classnames+:: a list of test class names.
+        # +suitename+:: name of the suite.
+        # +onetest++: whether all tests should be rolled into one.
+        # +excluded++: classes excluded from the test.
         def create_suite_xml(filename, classnames, suitename="default", onetest=false, excluded = [])
        
           File.open(filename, 'w') do |suitexml|
@@ -186,9 +206,8 @@ module Rake
           end
                          
         end # create_suite_xml 
-      
-        
-        def write_excludes_includes(xml, excluded, included = [])           
+            
+        def write_excludes_includes(xml, excluded, included = []) # :nodoc:          
               xml.groups do
                 xml.run do
                   excluded.each do |ex|

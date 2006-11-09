@@ -1,8 +1,16 @@
 require 'rake'
 require 'rake/tasklib'
 
-module Rake
-  class JarTask < TaskLib
+module Jerbil
+  # A task to create jar files.
+  #
+  # == Example
+  #   Jerbil::JarTask.new do |t|
+  #     t.dir = JAVA_BUILD_DIR
+  #     t.filename = DISTJAR
+  #     t.depends_on :clean, :compile
+  #   end
+  class JarTask < Rake::TaskLib
     include JavaHelper
   
     attr_accessor :name, :dir, :filename, :files

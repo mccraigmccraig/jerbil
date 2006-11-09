@@ -14,7 +14,7 @@ spec = Gem::Specification.new do |s|
   s.email = 'jan@trampolinesystems.com'
   s.platform = Gem::Platform::RUBY
   s.required_ruby_version = '>= 1.8.4'
-  s.summary = 'Jerbil java build system'
+  s.summary = 'Java build system, based on rake'
   s.name = 'jerbil'
   s.homepage = 'http://code.trampolinesystems.com/jerbil'
   s.version = read_version
@@ -22,9 +22,10 @@ spec = Gem::Specification.new do |s|
   s.add_dependency('rake', '>= 0.7.1')
   s.require_path = 'lib'
   s.requirements << 'rjb'
+  s.requirements << 'rake'
   s.requirements << 'JDK 5.0'
-  files = FileList['lib/**/*', 'test/*.rb', 'buildsupport/**/*', 'classloader/*', 'COPYING', 'ChangeLog', 'README']
-  s.has_rdoc = false
+  files = FileList['lib/**/*', 'test/*.rb', 'buildsupport/**/*', 'classloader/*', 'sample/**/*', 'COPYING', 'ChangeLog', 'README']
+  s.has_rdoc = true
   s.files = files
   s.test_files = FileList['test/*.rb']
   s.description = <<EOD
@@ -41,6 +42,7 @@ end
 Rake::RDocTask.new do |rd|
   rd.main = "README"
   rd.rdoc_files.include("README", "lib/**/*.rb")
+  rd.options << "--inline-source"
 end
   
 Rake::TestTask.new do |t|
@@ -66,5 +68,14 @@ task :compile_classloader do |t|
       
     $stderr << "Make sure javac is in your PATH, or set JAVA_HOME"
     raise
+  end
+end
+
+desc "publish documentation"
+task :publish_doc  do |t|
+  require 'net/sftp'
+  Net::SFTP.start("trampolinesystems.com") do |s|
+    #s.put_file(File.join(Rake.original_dir,'Rakefile'), '/tmp/R')
+    #s.mkdir('/tmp/moin')
   end
 end

@@ -2,17 +2,15 @@ require 'rake'
 require 'rake/tasklib'
 require File.dirname(__FILE__) + '/java_helper'
 
-
-
-module Rake
+module Jerbil
   # == Example
   #
   #  desc "compile all java files"
-  #  Rake::JavacTask.new(:compile) do |t|
-  #    t.java_files = JAVA_FILES
+  #  Jerbil::JavacTask.new(:compile) do |t|
+  #    t.java_files = Jerbil::JavaFileList.new("src", "classes")
   #    t.options :nowarn, :debug
   #  end
-  class JavacTask < TaskLib
+  class JavacTask < Rake::TaskLib
     include JavaHelper, ExtraArgumentTaking
     
     attr_accessor :name
