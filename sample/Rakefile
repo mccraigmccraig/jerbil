@@ -6,7 +6,7 @@ require 'buildconfig'
 
 include JavaHelper
 
-load_vm(CLASSPATH, nil, JAVA_BUILD_DIR)
+load_vm(CLASSPATH, JAVA_BUILD_DIR)
 
 task :default => :compile
 
