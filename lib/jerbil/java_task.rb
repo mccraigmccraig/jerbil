@@ -8,8 +8,8 @@ module Jerbil
   # == Example (forked)
   #     Jerbil::JavaTask.new(:run, "jerbil.sample.Main") do |t|
   #       t.classpath = CLASSPATH
-  #       t.parameters = [ "-foo", "baz" ]       
-  #       t.sys_property "jerbil.foo", "baz"
+  #       t.parameters = [ "--quiet" ]       
+  #       t.max_mem = 64
   #       t.fork = true
   #       t.depends_on :compile
   #     end

@@ -121,17 +121,17 @@ module Jerbil
     end
   end
   
-  # Tasks including this module can specifiy additional
-  # Java style arguments (like -verbose, -gc).
+  # Tasks including this module can easily specify additional
+  # Java-style arguments (like -verbose, -gc).
   # 
   # == Example
   #
   #     Jerbil::MyExtraArgumentTakingTask.new do |t|
-  #       t.foo = 'baz'
+  #       t.source = '1.5'
   #       t.options :wibble, :wobble
   #     end
   #
-  # results in a command line of the form "-foo baz -wibble -wobble".  
+  # results in a command line of the form "-source 1.5 -wibble -wobble".  
   module ExtraArgumentTaking      
       def self.append_features(base)
         super         
@@ -255,6 +255,14 @@ module Jerbil
   
   # A MultiJavaFileList is a container object for holding several JavaFileList
   # objects. This is useful for multidirectory builds.
+  #
+  # == Example
+  #   SOURCE_DIR = "src"
+  #   MODULES    = [ "a", "b" ]
+  #   JAVA_BUILD_DIR = "classes"
+  #   JAVA_FILES = MultiJavaFileList.new(MODULES, JAVA_BUILD_DIR, SOURCE_DIR)
+  #
+  # This will look for source files in +a/src+ and +b/src+, compiling into +classes+.
   class MultiJavaFileList
   
     attr_reader :modules, :dstdir

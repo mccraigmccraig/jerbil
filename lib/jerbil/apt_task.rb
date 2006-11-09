@@ -49,6 +49,8 @@ module Jerbil
       Rjb::bind(self, 'com.sun.mirror.apt.AnnotationProcessor')
     end
     
+    # this is needed by java - the factory gets stored internally
+    # in a map, so it needs to return a hash code.
     def hashCode # :nodoc:
       123456
     end 
@@ -78,7 +80,7 @@ module Jerbil
     end
     
     # A convenience method to serialize a list of found annotations 
-    # to +filename+ using yaml.
+    # to file +filename+ (yaml format).
     def annotated_classes_to_yaml(annotation, filename)
       find_annotation annotation do |classes|
         File.open(filename, 'w') { |f| f << classes.to_a.uniq.to_yaml }
@@ -106,6 +108,7 @@ module Jerbil
       end
     end
     
+    # Calls all registered handlers.
     def post_compile
       super unless nocompile
       @found_annotations.each do |name, types|
@@ -114,7 +117,7 @@ module Jerbil
       end
     end
     
-    def get_processor_factory
+    def get_processor_factory # :nodoc:
        Rjb::bind(self, 'com.sun.mirror.apt.AnnotationProcessorFactory')
     end
     

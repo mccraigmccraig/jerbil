@@ -101,7 +101,8 @@ module Jerbil
       end
      end
      
-     # Wrapper class around _org.hibernate.tool.hbm2ddl.SchemaExport_.
+     # Wrapper class around 
+     # {org.hibernate.tool.hbm2ddl.SchemaExport.}[http://www.hibernate.org/hib_docs/v3/api/org/hibernate/tool/hbm2ddl/SchemaExport.html]
      class SchemaExporter
        def initialize(classes, outputfile, dialect, package=nil)
           @exporter = SchemaExporter.get_schema_exporter(classes, dialect, package)

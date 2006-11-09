@@ -15,6 +15,8 @@ module Jerbil
     #     t.depends_on :test_compile
     #   end
     #
+    # The test classes can be specified by passing a Jerbil::JavaFileList to 
+    # +tests+, or by setting the location of xml test suites using +suites+.
     class TestNGTask < Rake::TaskLib
       include JavaHelper
       
@@ -174,8 +176,8 @@ module Jerbil
         # +filename+:: destination file for suite file.
         # +classnames+:: a list of test class names.
         # +suitename+:: name of the suite.
-        # +onetest++: whether all tests should be rolled into one.
-        # +excluded++: classes excluded from the test.
+        # +onetest+:: whether all tests should be rolled into one.
+        # +excluded+:: classes excluded from the test.
         def create_suite_xml(filename, classnames, suitename="default", onetest=false, excluded = [])
        
           File.open(filename, 'w') do |suitexml|

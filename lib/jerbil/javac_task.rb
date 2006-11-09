@@ -3,6 +3,10 @@ require 'rake/tasklib'
 require File.dirname(__FILE__) + '/java_helper'
 
 module Jerbil
+  # Compiles Java source files. 
+  # The location of the source files and the destionation directory is encapsulated
+  # in a JavaFileList.
+  #
   # == Example
   #
   #  desc "compile all java files"
