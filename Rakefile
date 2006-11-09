@@ -3,7 +3,7 @@ require 'rake/testtask'
 require 'rake/gempackagetask'
 require 'rake/rdoctask'
 
-task :default => :test 
+task :default => :repackage 
 
 def read_version
   "0.1"
@@ -13,12 +13,13 @@ spec = Gem::Specification.new do |s|
   s.authors = 'Jan Berkel'
   s.email = 'jan@trampolinesystems.com'
   s.platform = Gem::Platform::RUBY
-  s.required_ruby_version = '>= 1.8.2'
+  s.required_ruby_version = '>= 1.8.4'
   s.summary = 'Jerbil java build system'
   s.name = 'jerbil'
   s.homepage = 'http://code.trampolinesystems.com/jerbil'
   s.version = read_version
   s.add_dependency('rjb', '>= 1.0')
+  s.add_dependency('rake', '>= 0.7.1')
   s.require_path = 'lib'
   s.requirements << 'rjb'
   s.requirements << 'JDK 5.0'
