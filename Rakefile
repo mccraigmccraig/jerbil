@@ -3,6 +3,8 @@ require 'rake/testtask'
 require 'rake/gempackagetask'
 require 'rake/rdoctask'
 
+WWWROOT = "/var/www/code.trampolinesystems.com/"
+
 task :default => :repackage 
 
 def read_version
@@ -73,9 +75,20 @@ end
 
 desc "publish documentation"
 task :publish_doc  do |t|
-  require 'net/sftp'
-  Net::SFTP.start("trampolinesystems.com") do |s|
-    #s.put_file(File.join(Rake.original_dir,'Rakefile'), '/tmp/R')
-    #s.mkdir('/tmp/moin')
-  end
+  `scp -r html/* trampolinesystems.com:#{WWWROOT}/doc/jerbil/`
 end
+task :publish_doc => :rerdoc
+
+task :copy_gem do |t|
+  `scp pkg/* trampolinesystems.com:#{WWWROOT}/gems` 
+end
+task :copy_gem => :repackage
+
+task :update_gem_index do |t|
+  `ssh trampolinesystems.com generate_yaml_index -d #{WWWROOT}`
+end
+
+desc "publish gem"
+task :publish_gem => [:copy_gem, :update_gem_index]
+
+task :dist => [ :compile_classloader, :publish_gem, :publish_doc ]
