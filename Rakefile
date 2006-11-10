@@ -4,12 +4,13 @@ require 'rake/gempackagetask'
 require 'rake/rdoctask'
 require 'rake/clean'
 
+CLEAN.include('pkg')
 WWWROOT   = "/var/www/code.trampolinesystems.com/"
 FILES     = FileList['lib/**/*', 'test/*.rb', 'classloader/*', 'COPYING', 'CHANGES', 'README']
-FULLFILES = FILES.clone.include('buildsupport/**/*', 'sample/**/*' )
+FULLFILES = FILES.clone.include('buildsupport/**/*', 'example/**/*' )
 TESTFILES = FileList['test/test_java_helper.rb']
-FULLTESTFILES = TESTFILES.clone.include('test/test_java_helper.rb')
-CLEAN.include('pkg')
+FULLTESTFILES = TESTFILES.clone.include('test/test_build.rb')
+
 JERBIL_VERSION   = "0.1"
 
 task :default => :repackage 
@@ -59,7 +60,7 @@ Rake::RDocTask.new do |rdoc|
   rdoc.main = "README"
   rdoc.title    = "Jerbil"
   rdoc.options << '--line-numbers' << '--inline-source' << '--main' << 'README'
-  rdoc.rdoc_files.include("README", "CHANGES", "TODO", "lib/**/*.rb")
+  rdoc.rdoc_files.include("README", "CHANGES", "TODO", "LICENSE", "lib/**/*.rb")
 end
   
 Rake::TestTask.new do |t|
