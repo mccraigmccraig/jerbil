@@ -5,7 +5,7 @@ $:.unshift File.join( File.dirname(__FILE__), "..", "lib" )
 require 'jerbil/java_helper'
 require 'test/unit'
 require 'yaml'
-require 'sample/buildconfig'
+require 'example/buildconfig'
 
 class TestBuild < Test::Unit::TestCase
   def test_compile
@@ -122,7 +122,7 @@ class TestBuild < Test::Unit::TestCase
   end
   
   def run_rake(*args, &block)
-    Dir.chdir("sample") do
+    Dir.chdir("example") do
       #sh "rake --quiet #{args.join(' ')}" do |ok,res|
       cmd = args.join(" ")
       #on windows, exec invokes a subshell which does not inherit environment variables,
