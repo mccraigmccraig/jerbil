@@ -178,7 +178,7 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/sample.iml" filepath="$PROJECT_DIR$/sample.iml" />
+      <module fileurl="file://$PROJECT_DIR$/example.iml" filepath="$PROJECT_DIR$/example.iml" />
     </modules>
   </component>
   <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" />
