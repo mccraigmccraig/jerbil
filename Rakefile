@@ -6,7 +6,7 @@ require 'rake/clean'
 
 CLEAN.include('pkg')
 WWWROOT   = "/var/www/code.trampolinesystems.com/"
-FILES     = FileList['lib/**/*', 'test/*.rb', 'classloader/*', 'COPYING', 'CHANGES', 'README']
+FILES     = FileList['lib/**/*', 'test/*.rb', 'classloader/*', 'LICENSE', 'TODO', 'CHANGES', 'README']
 FULLFILES = FILES.clone.include('buildsupport/**/*', 'example/**/*' )
 TESTFILES = FileList['test/test_java_helper.rb']
 FULLTESTFILES = TESTFILES.clone.include('test/test_build.rb')
@@ -57,7 +57,6 @@ namespace :full do
 end
 
 Rake::RDocTask.new do |rdoc|
-  rdoc.main = "README"
   rdoc.title    = "Jerbil"
   rdoc.options << '--line-numbers' << '--inline-source' << '--main' << 'README'
   rdoc.rdoc_files.include("README", "CHANGES", "TODO", "LICENSE", "lib/**/*.rb")

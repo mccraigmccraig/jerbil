@@ -11,17 +11,21 @@
     -- James Duncan Davidson, creator of Apache Ant
  
 This package contains several TaskLibs for Rake which can be
-used to build Java projects. Jerbil uses RJB[http://raa.ruby-lang.org/project/rjb/]
-(Ruby-Java-Bridge) to load a Java virtual machine in the ruby process running rake.
+used to build Java projects. 
+
+Jerbil uses RJB[http://raa.ruby-lang.org/project/rjb/]
+(Ruby-Java-Bridge) to load a Java virtual machine into Rake.
 
 The jvm is then used to compile Java source files, create javadocs etc.
-It is not a complete replacement for ant (yet), but has some significant advantages as it
-is easily scriptable. The main focus at the moment are small to medium-sized projects using 
+It is not a complete replacement for ant (yet), but has several advantages such as
+extremly compact build files and easy scriptability. 
+
+The main focus at the moment are small to medium-sized projects using 
 testng[http://testng.org] and hibernate[http://hibernate.org].
 
 == Requirements
 
-Jerbil requires rubygems, rake, rjb and JDK 1.5. 
+Jerbil requires rubygems[http://rubygems.org], Rake, RJB and JDK 1.5. 
 
 == Installation
 
@@ -50,10 +54,10 @@ See the example/[http://svn.trampolinesystems.com/jerbil/trunk/example] subdirec
 
   % svn co http://svn.trampolinesystems.com/jerbil/trunk/example
 
-== Advantages over ant
+== Advantages over Ant
 
-Well, it's based on Ruby :) Additionally, RJB allows ruby classes to implement arbitary
-Java interfaces which allows you to extend existing Java code in Ruby, on runtime.
+Well, it's based on Ruby :) Additionally, RJB allows Ruby code to implement arbitary
+Java interfaces which you can then pass into compiled Java code.  
 See Jerbil::TestNG::TestListener for an example.
 
 == Related projects
