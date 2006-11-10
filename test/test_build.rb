@@ -52,7 +52,7 @@ class TestBuild < Test::Unit::TestCase
       classes = YAML.load_file(ANNOTATED_CLASSES)
       
       assert_equal 1, classes.length
-      assert_equal ["jerbil.sample.Jerbiliser"], classes
+      assert_equal ["jerbil.example.Jerbiliser"], classes
     end
   end
   

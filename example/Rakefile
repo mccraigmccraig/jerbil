@@ -45,34 +45,34 @@ Jerbil::JarTask.new do |t|
   t.depends_on :clean, :compile
 end
 
-Jerbil::JavaTask.new(:run, "jerbil.sample.Main") do |t|
+Jerbil::JavaTask.new(:run, "jerbil.example.Main") do |t|
   t.classpath = CLASSPATH
   t.parameters = [ "20", "50" ]
   t.depends_on :compile
 end
 
-Jerbil::JavaTask.new(:run_in_vm, "jerbil.sample.Main") do |t|
+Jerbil::JavaTask.new(:run_in_vm, "jerbil.example.Main") do |t|
   t.classpath = CLASSPATH
   t.parameters = [ "20", "50" ]
   t.depends_on :compile
   t.in_vm = true 
 end
 
-Jerbil::JavaTask.new(:run_forked, "jerbil.sample.Main") do |t|
+Jerbil::JavaTask.new(:run_forked, "jerbil.example.Main") do |t|
   t.classpath = CLASSPATH
   t.parameters = [ "50", "-50" ]
   t.depends_on :compile
   t.fork = true
 end
 
-Jerbil::JavaTask.new(:run_forked_fail, "jerbil.sample.Main") do |t|
+Jerbil::JavaTask.new(:run_forked_fail, "jerbil.example.Main") do |t|
   t.classpath = CLASSPATH
   t.parameters = [ "0", "20" ]
   t.depends_on :compile 
   t.fork = true
 end
 
-Jerbil::JavaTask.new(:test_java_task, "jerbil.sample.Main2") do |t|
+Jerbil::JavaTask.new(:test_java_task, "jerbil.example.Main2") do |t|
   t.classpath = CLASSPATH
   t.sys_property "jerbil.foo", "baz" 
   t.max_mem = 64
@@ -88,7 +88,7 @@ Jerbil::AptTask.new(:find_annotations) do |t|
   t.java_files= JAVA_FILES
   t.nocompile = true
   t.depends_on :compile
-  t.find_annotation 'jerbil.sample.MyAnnotation' do |classes|
+  t.find_annotation 'jerbil.example.MyAnnotation' do |classes|
     File.open(ANNOTATED_CLASSES, 'w') { |f| f << classes.to_yaml }
   end
   t.annotated_classes_to_yaml('javax.persistence.Entity', PERSISTENCE_YML)

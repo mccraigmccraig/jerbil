@@ -1,4 +1,4 @@
-package jerbil.sample;
+package jerbil.example;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

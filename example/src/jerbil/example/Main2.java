@@ -1,4 +1,4 @@
-package jerbil.sample;
+package jerbil.example;
 
 /**
  * A class for testing the setting of system properties.

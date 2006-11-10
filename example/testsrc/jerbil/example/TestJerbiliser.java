@@ -1,4 +1,4 @@
-package jerbil.sample;
+package jerbil.example;
 
 import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;

@@ -1,4 +1,4 @@
-package jerbil.sample;
+package jerbil.example;
 
 /**
  * A main class, for testing.

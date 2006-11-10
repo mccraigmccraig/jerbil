@@ -8,7 +8,7 @@
   a format that is too bulky for the way that people really want to use
   the tool."
   
-    -- James Duncan Davidson, creator of ant
+    -- James Duncan Davidson, creator of Apache Ant
  
 This package contains several TaskLibs for Rake which can be
 used to build Java projects. Jerbil uses RJB[http://raa.ruby-lang.org/project/rjb/]
@@ -21,31 +21,54 @@ testng[http://testng.org] and hibernate[http://hibernate.org].
 
 == Requirements
 
-Jerbil requires rjb and JDK 1.5. The JAVA_HOME environment variable needs to point to the
-installed JDK.
+Jerbil requires rubygems, rake, rjb and JDK 1.5. 
 
 == Installation
 
+You need to have rubygems installed. On Debian systems (testing) this is a simple as
+  
+  % apt-get install rubygems
+  
+Rake and rjb are best installed using gem:
+
+  % gem install rake
+  % gem install rjb
+  
+The installation of rjb requires that the JDK is installed and JAVA_HOME set up
+accordingly. Finally jerbil needs to be installed:
+
   % gem install jerbil --source http://code.trampolinesystems.com
 
-Jerbil might become an 'official' rubygem at some later point. Some tasks require additional
+Jerbil might become an 'official' rubygem at some later point. Note that some tasks require additional
 jar files, for example Jerbil::TestNG::TestNGTask.
 
-The source code is available via anon svn: http://svn.trampolinesystems.com/jerbil/
+The source code is available via subversion: http://svn.trampolinesystems.com/jerbil/
   
 == Example
 
-See the example/ subdirectory in the repository.
+See the example/[http://svn.trampolinesystems.com/jerbil/trunk/example] subdirectory in the repository.
 
   % svn co http://svn.trampolinesystems.com/jerbil/trunk/example
 
 == Advantages over ant
 
-Well, it's based on Ruby :) Additionally, RJB allows ruby classes to implement  
+Well, it's based on Ruby :) Additionally, RJB allows ruby classes to implement arbitary
+Java interfaces which allows you to extend existing Java code in Ruby, on runtime.
+See Jerbil::TestNG::TestListener for an example.
 
+== Related projects
+
+* Raven[http://raven.rubyforge.org/]: similar to jerbil in scope, but different approach (invokes 
+  javac directly, no Java-Ruby integration).
+ 
 == FAQ
 
 See JerbilFAQ[http://code.trampolinesystems.com/jerbil/wiki/JerbilFAQ].
+
+== Contact
+
+Questions? Feedback?
+mailto:jan@trampolinesystems.com
 
 == License
 
