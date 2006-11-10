@@ -1,7 +1,7 @@
 package jerbil.sample;
 
 /**
- * TODO: comment
+ * A class for testing the setting of system properties.
  */
 public class Main2 {
     public static void main(String[] args) {

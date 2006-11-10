@@ -1,1 +1,4 @@
-README
+= Jerbil -- Java build system based on Rake[http://rake.rubyforge.org]
+
+This package contains several TaskLibs for rake which can be
+used to build Java projects.

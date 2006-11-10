@@ -2,14 +2,17 @@ require 'rake'
 require 'rake/testtask'
 require 'rake/gempackagetask'
 require 'rake/rdoctask'
+require 'rake/clean'
 
-WWWROOT = "/var/www/code.trampolinesystems.com/"
+WWWROOT   = "/var/www/code.trampolinesystems.com/"
+FILES     = FileList['lib/**/*', 'test/*.rb', 'classloader/*', 'COPYING', 'CHANGES', 'README']
+FULLFILES = FILES.clone.include('buildsupport/**/*', 'sample/**/*' )
+TESTFILES = FileList['test/test_java_helper.rb']
+FULLTESTFILES = TESTFILES.clone.include('test/test_java_helper.rb')
+CLEAN.include('pkg')
+JERBIL_VERSION   = "0.1"
 
 task :default => :repackage 
-
-def read_version
-  "0.1"
-end
 
 spec = Gem::Specification.new do |s|
   s.authors = 'Jan Berkel'
@@ -19,32 +22,44 @@ spec = Gem::Specification.new do |s|
   s.summary = 'Java build system, based on rake'
   s.name = 'jerbil'
   s.homepage = 'http://code.trampolinesystems.com/jerbil'
-  s.version = read_version
+  s.version = JERBIL_VERSION
   s.add_dependency('rjb', '>= 1.0')
   s.add_dependency('rake', '>= 0.7.1')
   s.require_path = 'lib'
   s.requirements << 'rjb'
   s.requirements << 'rake'
   s.requirements << 'JDK 5.0'
-  files = FileList['lib/**/*', 'test/*.rb', 'buildsupport/**/*', 'classloader/*', 'sample/**/*', 'COPYING', 'ChangeLog', 'README']
   s.has_rdoc = true
-  s.files = files
-  s.test_files = FileList['test/*.rb']
+  s.files = FILES
+  s.test_files = TESTFILES
   s.description = <<EOD
 Jerbil (Java-Ruby-Build) is a rake and rjb based build system.
 EOD
 end
 
 Rake::GemPackageTask.new(spec) do |pkg|
-  pkg.gem_spec = spec
-  pkg.need_zip = false
-  pkg.need_tar = false
+    pkg.gem_spec = spec
+    pkg.need_zip = false
+    pkg.need_tar = false
+end
+  
+namespace :full do
+  fullspec = spec.clone
+  fullspec.files = FULLFILES
+  fullspec.test_files = FULLTESTFILES
+  fullspec.name = 'jerbil-full'
+  Rake::GemPackageTask.new(fullspec) do |pkg|
+    pkg.gem_spec = fullspec
+    pkg.need_zip = false
+    pkg.need_tar = false
+  end
 end
 
-Rake::RDocTask.new do |rd|
-  rd.main = "README"
-  rd.rdoc_files.include("README", "lib/**/*.rb")
-  rd.options << "--inline-source"
+Rake::RDocTask.new do |rdoc|
+  rdoc.main = "README"
+  rdoc.title    = "Jerbil"
+  rdoc.options << '--line-numbers' << '--inline-source' << '--main' << 'README'
+  rdoc.rdoc_files.include("README", "CHANGES", "TODO", "lib/**/*.rb")
 end
   
 Rake::TestTask.new do |t|
