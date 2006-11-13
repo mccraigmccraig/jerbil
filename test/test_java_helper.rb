@@ -30,11 +30,9 @@ module Jerbil
     end
   
     def test_to_cp
-      flist = FileList["ab.jar", "cd.jar", "ef.jar"]
-      $JAVA_PATH_SEPERATOR = ":"
-      assert_equal 'ab.jar:cd.jar:ef.jar', flist.to_cp
-      $JAVA_PATH_SEPERATOR = ";"
-      assert_equal 'ab.jar;cd.jar;ef.jar', flist.to_cp
+      flist = FileList["ab.jar", "cd.jar", "ef.jar"]          
+      assert_equal 'ab.jar:cd.jar:ef.jar', flist.to_cp(':')
+      assert_equal 'ab.jar;cd.jar;ef.jar', flist.to_cp(';')
     end
   end
 end

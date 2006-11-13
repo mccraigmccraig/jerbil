@@ -7,16 +7,15 @@ rescue LoadError
 	require 'rake'
 end
 
-# for some really weird reasons schemaexport fails on mac os x
-# if java is not running in debug mode
-$JAVA_DEBUG = RUBY_PLATFORM =~ /darwin/i || false
-$IS_WINDOWS = RUBY_PLATFORM =~ /mswin|mingw/i
-$JAVA_PATH_SEPERATOR = $IS_WINDOWS ? ';' : ':'
-$DIR_SEP = $IS_WINDOWS ? "\\" : "/"
-$DIR_SEP_FOR_SUBSTITUTION = $IS_WINDOWS ? "\\\\" : "/"
-
 module Jerbil
-
+  # for some really weird reasons schemaexport fails on mac os x
+  # if java is not running in debug mode
+  JAVA_DEBUG = ::RUBY_PLATFORM =~ /darwin/i || false
+  IS_WINDOWS = RUBY_PLATFORM =~ /mswin|mingw/i
+  JAVA_PATH_SEPERATOR = IS_WINDOWS ? ';' : ':'
+  DIR_SEP = IS_WINDOWS ? "\\" : "/"
+  DIR_SEP_FOR_SUBSTITUTION = IS_WINDOWS ? "\\\\" : "/"
+  
   # The JavaHelper module provides common helper functionality needed across different
   # classes.
   module JavaHelper
@@ -89,8 +88,8 @@ module Jerbil
       
       jvmargs = []    
       jvmargs << "-Djava.util.logging.config.file=#{loggingprops.to_s}" unless loggingprops.nil? 
-  
-      if $JAVA_DEBUG
+       
+      if JAVA_DEBUG || ENV['JAVA_DEBUG']
         jvmargs += [
         "-Xdebug",
         "-Xnoagent",
@@ -191,10 +190,10 @@ module Jerbil
     # For example src/org/foo/Baz -> org.foo.Baz.
     def to_classnames
       # remove the initial directory and separator
-      sub = srcdir + $DIR_SEP_FOR_SUBSTITUTION
+      sub = srcdir + DIR_SEP_FOR_SUBSTITUTION
       paths = self.pathmap("%{^#{sub},}X")
       
-      paths.gsub!($DIR_SEP, ".")
+      paths.gsub!(DIR_SEP, ".")
       paths.gsub!("/", "." )
     end
     
@@ -278,7 +277,7 @@ module Jerbil
     end
     
     def sourcepath
-      @java_files.collect{|jf| jf.srcdir}.join($JAVA_PATH_SEPERATOR)
+      @java_files.collect{|jf| jf.srcdir}.join(JAVA_PATH_SEPERATOR)
     end
     
     def srcdir
@@ -323,8 +322,8 @@ module Rake
   class FileList  
     # Returns the filelist formatted as Java classpath.
     # ("/tmp/foo.jar:/tmp/baz.jar")
-    def to_cp  
-      self.join($JAVA_PATH_SEPERATOR)
+    def to_cp(sep = Jerbil::JAVA_PATH_SEPERATOR)
+      self.join(sep)
     end
   end
   

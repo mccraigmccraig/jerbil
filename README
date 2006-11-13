@@ -29,7 +29,7 @@ Jerbil requires rubygems[http://rubygems.org], Rake, RJB and JDK 1.5.
 
 == Installation
 
-You need to have rubygems installed. On Debian systems (testing) this is a simple as
+You need to have Ruby and rubygems installed. On Debian systems (testing) this is a simple as:
   
   % apt-get install rubygems
   

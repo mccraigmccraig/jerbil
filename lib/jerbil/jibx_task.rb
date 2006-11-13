@@ -1,6 +1,6 @@
 require 'rake'
 require 'rake/tasklib'
-require File.dirname(__FILE__) + '/java_helper'
+require 'jerbil/java_helper'
 
 module Jerbil
   # Compiles JIBX bindings.

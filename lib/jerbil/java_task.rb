@@ -1,5 +1,6 @@
 require 'rake'
 require 'rake/tasklib'
+require 'jerbil/java_helper'
 
 module Jerbil
   # Runs a Java program, either in-vm or as separate process (forked or replacing

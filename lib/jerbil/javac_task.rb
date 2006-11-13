@@ -1,6 +1,6 @@
 require 'rake'
 require 'rake/tasklib'
-require File.dirname(__FILE__) + '/java_helper'
+require 'jerbil/java_helper'
 
 module Jerbil
   # Compiles Java source files. 
@@ -42,9 +42,9 @@ module Jerbil
         parms << "-verbose" if verbose
         
         # must do this to prevent javac bombing out on the file package-info.java
-        # due to known javac bug 6198196 - http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6198196
-        # $IS_WINDOWS is defined in the java_helper file - bit icky, I know, but it works
-        java_files.gsub!( "/", "\\" ) if $IS_WINDOWS
+        # due to known javac bug 6198196 -
+        # http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6198196
+        java_files.gsub!( "/", "\\" ) if Jerbil::IS_WINDOWS
                
         parms += extra_args.collect {|a|a.to_s} unless extra_args.nil?
         parms += java_files      

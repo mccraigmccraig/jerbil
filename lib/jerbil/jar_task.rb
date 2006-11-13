@@ -1,5 +1,5 @@
-require 'rake'
 require 'rake/tasklib'
+require 'jerbil/java_helper'
 
 module Jerbil
   # A task to create jar files.

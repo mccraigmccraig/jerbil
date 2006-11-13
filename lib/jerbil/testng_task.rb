@@ -1,7 +1,7 @@
 require 'rake'
 require 'rake/tasklib'
 require 'set'
-require File.dirname(__FILE__) + '/java_helper'
+require 'jerbil/java_helper'
 
 module Jerbil
   module TestNG

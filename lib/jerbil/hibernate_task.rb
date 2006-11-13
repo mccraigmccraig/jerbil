@@ -1,8 +1,8 @@
+require 'rake'
 require 'rake/tasklib'
+require 'jerbil/java_helper'
 require 'yaml'
 require 'set'
-require File.dirname(__FILE__) + '/java_helper'
-
 
 module Jerbil 
   module Hibernate 

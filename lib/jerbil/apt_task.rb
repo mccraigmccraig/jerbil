@@ -1,7 +1,6 @@
 require 'rake'
-require 'rake/tasklib'
-require File.dirname(__FILE__) + '/java_helper'
-require File.dirname(__FILE__) + '/javac_task'
+require 'jerbil/java_helper'
+require 'jerbil/javac_task'
 
 module Jerbil
 
