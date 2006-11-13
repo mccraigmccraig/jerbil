@@ -12,6 +12,7 @@ class TestBuild < Test::Unit::TestCase
     run_rake_clean(:compile) do |ok,res|
       assert ok
       assert_files_exist(JAVA_FILES.to_classfiles)
+      assert File.exists?(File.join(JAVA_BUILD_DIR, "jerbil/example/example.properties")) 
     end
   end
   

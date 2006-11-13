@@ -174,15 +174,16 @@ module Jerbil
     attr_reader :dstdir
     attr_accessor :resource_patterns
     
-    # srcdir:: the source dir
+    # srcdir:: the directory containing the Java source file. 
     # dstdir:: destination directory for class files (used by JavacTask).
+    # extensions:: a list of extensions to treat as resources. The default is to treat
+    # all files not ending in .java as resources.           
     def initialize(srcdir, dstdir, extensions = nil)
       super([])
       @srcdir = srcdir
       @dstdir = dstdir
-      @resource_patterns = []
-      copy_extensions = extensions || [ "xml", "properties" ] 
-      copy_extensions.each { |ext| add_extension(ext) } 
+      @resource_patterns = []     
+      add_extensions(extensions)
       include(srcdir + "/**/*.java")
     end
     
@@ -194,7 +195,7 @@ module Jerbil
       paths = self.pathmap("%{^#{sub},}X")
       
       paths.gsub!(DIR_SEP, ".")
-      paths.gsub!("/", "." )
+      #paths.gsub!("/", "." )
     end
     
     # Returns a list of Java classes. This method uses Rjb::import to
@@ -219,10 +220,16 @@ module Jerbil
     
     # Returns a Rake::FileList containing all resources found in +srcdir+.
     # Resources are typically files in +srcdir+ with extensions other than .java 
-    # (properties, xml, ...)
+    # (properties, xml, ...). If you want to copy specfic resources register 
+    # extensions using #add_extension.
     def resources
       r = FileList.new
-      resource_patterns.each { |p| r.include(srcdir+p) }
+      if resource_patterns.empty? 
+        r.include(srcdir + "/**/*.*")    
+        r.exclude(srcdir + "/**/*.java")     
+      else     
+        resource_patterns.each { |p| r.include(srcdir+p) }
+      end
       r
     end 
     
@@ -236,20 +243,17 @@ module Jerbil
     end
     
     # Registers a resource extension.
+    # 
+    #   add_extension("xml")  => all xml files 
+    # 
     def add_extension(ext)
       @resource_patterns << "/**/*.#{ext}"
     end
     
     # Registers a list of extensions.
     def add_extensions(exts)
-      @resource_patterns.concat(exts.to_a)
-    end
-  
-    def dump(files)
-      files.each do |f|
-        print f + "\n"
-      end
-    end
+      exts.to_a.each {|ext| add_extension(ext)}      
+    end    
   end
   
   # A MultiJavaFileList is a container object for holding several JavaFileList

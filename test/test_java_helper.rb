@@ -34,6 +34,12 @@ module Jerbil
       assert_equal 'ab.jar:cd.jar:ef.jar', flist.to_cp(':')
       assert_equal 'ab.jar;cd.jar;ef.jar', flist.to_cp(';')
     end
+    
+    def test_javafiles
+      flist = JavaFileList.new(File.join(File.dirname(__FILE__), "../example/src"), "build")
+      assert_equal 5, flist.to_classnames.length, flist.to_classnames
+      assert_equal 1, flist.resources.length, flist.resources
+    end
   end
 end
 

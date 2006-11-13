@@ -16,7 +16,7 @@ module Jerbil
     include ExtraArgumentTaking
     
      attr_accessor :name
-     # Desstionation directory for javadocs.
+     # Destionation directory for javadocs.
      attr_accessor :dstdir
           
      def initialize(name = :javadoc)
