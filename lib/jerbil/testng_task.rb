@@ -179,7 +179,8 @@ module Jerbil
         # +onetest+:: whether all tests should be rolled into one.
         # +excluded+:: classes excluded from the test.
         def create_suite_xml(filename, classnames, suitename="default", onetest=false, excluded = [])
-       
+          require 'builder'
+          
           File.open(filename, 'w') do |suitexml|
             xml = Builder::XmlMarkup.new(:target=>suitexml, :indent=>4)
             xml.instruct!

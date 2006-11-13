@@ -26,9 +26,11 @@ spec = Gem::Specification.new do |s|
   s.version = JERBIL_VERSION
   s.add_dependency('rjb', '>= 1.0')
   s.add_dependency('rake', '>= 0.7.1')
+  s.add_dependency('builder')
   s.require_path = 'lib'
   s.requirements << 'rjb'
   s.requirements << 'rake'
+  s.requirements << 'builder'
   s.requirements << 'JDK 5.0'
   s.has_rdoc = true
   s.files = FILES
