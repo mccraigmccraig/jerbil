@@ -7,6 +7,8 @@ rescue LoadError
 	require 'rake'
 end
 
+require 'fileutils'
+
 module Jerbil
   # for some really weird reasons schemaexport fails on mac os x
   # if java is not running in debug mode
@@ -120,6 +122,7 @@ module Jerbil
     end
   end
   
+  ######################################################################
   # Tasks including this module can easily specify additional
   # Java-style arguments (like -verbose, -gc).
   # 
@@ -166,6 +169,7 @@ module Jerbil
       end
   end
   
+  ######################################################################
   # A JavaFileList is a specialisation of a standard Rake::FileList.
   # It includes additional methods to deal with build dirs, resources 
   # and other java specifics.
@@ -235,11 +239,33 @@ module Jerbil
     
     # Calls block once for each resource found in +srcdir+, passing
     # the source and destination file as parameter.
-    def resources_and_target
+    def resource_and_target # :yields: resource,target
       resources.each do | r |
         target =  r.sub(/#{srcdir}/, dstdir)
         yield r, target if block_given?
       end
+    end
+    
+    # Calls block once for each sourcefile in +srcdir+ with corresponding target
+    # file.
+    def source_and_target    # :yields: src,target
+      self.each do |file|
+          yield file, file.pathmap("%{^#{srcdir},#{dstdir}}X.class")
+      end      
+    end
+    
+    def out_of_date
+      return self.to_a unless (File.exists?(dstdir) and Dir.entries(dstdir).length > 2)      
+      
+      outofdate = []
+      source_and_target do |s,t|  
+        outofdate << s unless FileUtils.uptodate?(t,s)
+      end
+      outofdate
+    end
+    
+    def uptodate?
+      out_of_date.empty?
     end
     
     # Registers a resource extension.
@@ -256,6 +282,7 @@ module Jerbil
     end    
   end
   
+  ######################################################################
   # A MultiJavaFileList is a container object for holding several JavaFileList
   # objects. This is useful for multidirectory builds.
   #
@@ -281,7 +308,7 @@ module Jerbil
     end
     
     def sourcepath
-      @java_files.collect{|jf| jf.srcdir}.join(JAVA_PATH_SEPERATOR)
+      self.srcdir.join(JAVA_PATH_SEPERATOR)
     end
     
     def srcdir
@@ -308,12 +335,30 @@ module Jerbil
       res
     end
     
-    def resources_and_target
+    def resource_and_target
       @java_files.each do |jf|
-        jf.resources_and_target do |r,t|
+        jf.resource_and_target do |r,t|
           yield r,t
         end
       end
+    end
+    
+    def source_and_target
+      @java_files.each do |jf|
+        jf.source_and_target do |s,t|
+          yield s,t
+        end
+      end
+    end
+    
+    def uptodate?
+      (@java_files.find { |jf| !jf.uptodate? }).nil?
+    end
+    
+    def out_of_date
+      f = []
+      @java_files.each { |jf| f += jf.out_of_date }     
+      f
     end
     
     def gsub!( replace, replace_with )
@@ -321,6 +366,8 @@ module Jerbil
     end
   end
 end
+
+######################################################################
 
 module Rake
   class FileList  

@@ -1,10 +1,13 @@
 $:.unshift File.join( File.dirname(__FILE__),  "..", "lib" )
 
 require 'rake'
+require 'rake/clean'
 require 'jerbil'
 require 'buildconfig'
 
 include Jerbil::JavaHelper
+
+CLEAN.include(BUILD_DIR, DIST_DIR,TESTOUTPUTDIR)
 
 load_jvm(CLASSPATH, JAVA_BUILD_DIR)
 
@@ -100,13 +103,3 @@ Jerbil::Hibernate::ExportSchemaTask.new(:export_schema) do |t|
   t.schemafile = DB_SCHEMA
   t.persistencefile = PERSISTENCE_YML
 end
-
-
-task :clean do |t|
-  RakeFileUtils.verbose(false) do
-    rm_rf BUILD_DIR
-    rm_rf DIST_DIR
-    rm_rf TESTOUTPUTDIR
-  end
-end
-

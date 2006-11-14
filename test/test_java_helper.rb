@@ -36,10 +36,16 @@ module Jerbil
     end
     
     def test_javafiles
-      flist = JavaFileList.new(File.join(File.dirname(__FILE__), "../example/src"), "build")
+      flist = JavaFileList.new(File.join(File.dirname(__FILE__), "../example/src"), "../example/build")
       assert_equal 5, flist.to_classnames.length, flist.to_classnames
       assert_equal 1, flist.resources.length, flist.resources
-    end
+      
+      #flist.source_and_target do |s,t|
+      #  puts "#{s} ==> #{t}"
+      #end
+      
+      #puts flist.outofdate
+    end    
   end
 end
 

@@ -32,15 +32,12 @@ module Jerbil
       super
     end
         
-    
     def supportedOptions # :nodoc:
       empty_list
     end
 
     def supportedAnnotationTypes # :nodoc:
-      list = empty_list
-      annotations.each_key { |a| list.add a.to_s }
-      list
+      str_list(annotations.keys)
     end
     
     def getProcessorFor(set,env) # :nodoc:
@@ -86,7 +83,15 @@ module Jerbil
       end
     end
         
-    protected   
+    protected       
+    def needs_compiling?
+      true
+    end
+    
+    def gather_filenames
+      java_files
+    end
+    
     def compile(parameters, printwriter)
       apt = Rjb::import('com.sun.tools.apt.Main')
       parameters << "-nocompile" if nocompile

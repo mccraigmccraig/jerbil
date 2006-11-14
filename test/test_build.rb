@@ -9,11 +9,24 @@ require 'example/buildconfig'
 
 class TestBuild < Test::Unit::TestCase
   def test_compile
+  
+    tstamps, tstamps2 = []
+    
     run_rake_clean(:compile) do |ok,res|
       assert ok
       assert_files_exist(JAVA_FILES.to_classfiles)
-      assert File.exists?(File.join(JAVA_BUILD_DIR, "jerbil/example/example.properties")) 
+      assert File.exists?(File.join(JAVA_BUILD_DIR, "jerbil/example/example.properties"))
+      tstamps = JAVA_FILES.to_classfiles.collect { |f| File.mtime(f) }
     end
+      
+    #run another compile, without cleaning up
+    run_rake(:compile) do |ok,res|
+      assert ok
+      assert_files_exist(JAVA_FILES.to_classfiles) 
+      tstamps2 = JAVA_FILES.to_classfiles.collect { |f| File.mtime(f) }
+    end
+          
+    assert_equal tstamps, tstamps2
   end
   
   def test_javadoc

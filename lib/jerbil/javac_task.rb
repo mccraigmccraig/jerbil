@@ -36,34 +36,44 @@ module Jerbil
 	    desc "compile files in #{java_files.srcdir.to_a.join(', ')}" if Rake.application.last_comment.nil?     
       task name => dependencies do |t|
           
-        parms  = [ "-d", java_files.dstdir ]
-        parms += [ "-sourcepath", java_files.sourcepath ] unless java_files.sourcepath.nil? 
-        
-        parms << "-verbose" if verbose
-        
-        # must do this to prevent javac bombing out on the file package-info.java
-        # due to known javac bug 6198196 -
-        # http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6198196
-        java_files.gsub!( "/", "\\" ) if Jerbil::IS_WINDOWS
-               
-        parms += extra_args.collect {|a|a.to_s} unless extra_args.nil?
-        parms += java_files      
-         
-        #require 'pp'
-        #pp parms
-        
-        ret = 0
-        javacout = printWriter_to_s do |pw|
-          ret = compile(parms, pw)
+        if needs_compiling?
+          parms  = [ "-d", java_files.dstdir ]
+          parms += [ "-sourcepath", java_files.sourcepath ] if java_files.sourcepath 
+          
+          parms << "-verbose" if verbose
+          
+          # must do this to prevent javac bombing out on the file package-info.java
+          # due to known javac bug 6198196 -
+          # http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6198196
+          java_files.gsub!( "/", "\\" ) if Jerbil::IS_WINDOWS
+                 
+          parms += extra_args.collect {|a|a.to_s} if extra_args        
+          parms += gather_filenames    
+           
+          #require 'pp'
+          #pp parms
+          
+          ret = 0
+          javacout = printWriter_to_s do |pw|
+            ret = compile(parms, pw)
+          end
+      
+          raise "Compile error:\n#{javacout}" unless ret == 0                 
         end
-    
-        raise "Compile error:\n#{javacout}" unless ret == 0        
         post_compile
       end
       directory java_files.dstdir
     end
   
-    protected    
+    protected        
+    def needs_compiling?
+      not java_files.uptodate? 
+    end
+    
+    def gather_filenames
+      java_files.out_of_date    
+    end
+    
     def post_compile
       copy_resources
     end
@@ -74,7 +84,7 @@ module Jerbil
     end
     
     def copy_resources
-      java_files.resources_and_target do |res, target|
+      java_files.resource_and_target do |res, target|
         directory = File.dirname(target)
         RakeFileUtils.verbose(verbose) do      
           mkdir_p directory unless File.directory?(directory)
