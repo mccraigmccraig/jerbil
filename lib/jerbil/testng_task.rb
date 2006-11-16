@@ -132,7 +132,7 @@ module Jerbil
         end
         
         def onTestSuccess(result)
-          $stderr.print "."      
+          $stderr.print "."       
         end
      
         # Returns a list of all failed classes.
@@ -153,7 +153,8 @@ module Jerbil
         end
         
         def log(s)
-          (@outfile || $stderr).puts s.to_s
+          @outfile.puts(s.to_s) if @outfile
+          $stderr.puts(s.to_s) if Rake.application.options.trace
         end 
       end
       

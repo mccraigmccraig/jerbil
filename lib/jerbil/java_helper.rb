@@ -92,10 +92,11 @@ module Jerbil
       jvmargs << "-Djava.util.logging.config.file=#{loggingprops.to_s}" unless loggingprops.nil? 
        
       if JAVA_DEBUG || ENV['JAVA_DEBUG']
+        suspend = ENV['JAVA_DEBUG'].to_s.index('suspend') ? 'y' : 'n'
         jvmargs += [
         "-Xdebug",
         "-Xnoagent",
-        "-Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n" ]
+        "-Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=#{suspend}" ]
       end
       
       #java_home = ENV['JAVA_HOME']    
@@ -105,8 +106,10 @@ module Jerbil
       #jvmargs << "-Djava.library.path=#{ENV['JAVA_HOME']}/jre/lib/i386"
       
       if build_dir
+        jerbil_debug = ENV['JERBIL_DEBUG'] ? 'true' : 'false'
+        
         jvmargs += [ "-Djava.system.class.loader=JerbilClassLoader", 
-          "-Djerbil.build.root=#{build_dir.to_a.join(':')}", "-Djerbil.debug=false" ] 
+          "-Djerbil.build.root=#{build_dir.to_a.join(':')}", "-Djerbil.debug=#{jerbil_debug}" ] 
       else      
         $stderr << "jerbil: build_dir not set: dynamic classloading is disabled\n" if Rake.application.options.trace
       end
