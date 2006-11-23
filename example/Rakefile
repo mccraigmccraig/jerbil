@@ -5,8 +5,6 @@ require 'rake/clean'
 require 'jerbil'
 require 'buildconfig'
 
-include Jerbil::JavaHelper
-
 CLEAN.include(BUILD_DIR, DIST_DIR,TESTOUTPUTDIR)
 
 load_jvm(CLASSPATH, JAVA_BUILD_DIR)

@@ -82,7 +82,7 @@ module Jerbil
 	# +:java_opts+:: additional JVM arguments (defaults to ENV['JAVA_OPTS']
 	# +:loggingprops+:: the location of a java.util.logging configuration file.
 	# +:enableassert+:: wheter to enable assertions (default: enabled)
-    def load_jvm(classpath, build_dir = nil, options = {} )
+    def JavaHelper.load_jvm(classpath, build_dir = nil, options = {} )
 			
 	  defaultopts = { :enableassert => true }
 	  options = defaultopts.merge(options.dup)
@@ -387,8 +387,8 @@ module Jerbil
 end
 
 ######################################################################
-
-module Rake
+# Extensions for standard rake classes.
+module Rake  
   class FileList  
     # Returns the filelist formatted as Java classpath.
     # ("/tmp/foo.jar:/tmp/baz.jar")
@@ -408,5 +408,14 @@ module Rake
     end
   end
 end
+
+# make some stuff available to the toplevel
+
+JavaFileList = Jerbil::JavaFileList
+
+def load_jvm(args, build_dir, options={})
+	Jerbil::JavaHelper.load_jvm(args, build_dir, options)			
+end
+
 
 
