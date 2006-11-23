@@ -81,7 +81,12 @@ module Jerbil
 	# +:java_home+:: JDK path (defaults to ENV['JAVA_HOME']
 	# +:java_opts+:: additional JVM arguments (defaults to ENV['JAVA_OPTS']
 	# +:loggingprops+:: the location of a java.util.logging configuration file.
-    def load_jvm(classpath, build_dir = nil, options = {} ) 
+	# +:enableassert+:: wheter to enable assertions (default: enabled)
+    def load_jvm(classpath, build_dir = nil, options = {} )
+			
+	  defaultopts = { :enableassert => true }
+	  options = defaultopts.merge(options.dup)
+	  
       #need verbose java exceptions
       $VERBOSE = true
    
@@ -92,7 +97,9 @@ module Jerbil
       classpath.include(File.join(File.dirname(__FILE__), "../../buildsupport/*.jar"))
       classpath.include(File.join(File.dirname(__FILE__), "../../classloader")) if build_dir
       
+	  
       jvmargs = []    
+	  jvmargs << "-ea" if options[:enableassert]
       jvmargs << "-Djava.util.logging.config.file=#{options[:loggingprops].to_s}" if options[:loggingprops] 
        
       if JAVA_DEBUG || ENV['JAVA_DEBUG']
@@ -121,6 +128,7 @@ module Jerbil
 	  java_opts = ENV['JAVA_OPTS'] || options[:java_opts]
 	  jvmargs.unshift(java_opts) if java_opts
 	  
+	  puts jvmargs
       begin
         Rjb::load(classpath.to_cp, jvmargs)
       rescue 
