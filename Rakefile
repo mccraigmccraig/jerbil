@@ -62,6 +62,7 @@ Rake::RDocTask.new do |rdoc|
   rdoc.title    = "Jerbil"
   rdoc.options << '--line-numbers' << '--inline-source' << '--main' << 'README'
   rdoc.rdoc_files.include("README", "CHANGES", "TODO", "LICENSE", "lib/**/*.rb")
+	rdoc.rdoc_dir = 'rdoc'
 end
   
 Rake::TestTask.new do |t|

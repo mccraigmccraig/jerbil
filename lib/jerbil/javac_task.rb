@@ -23,12 +23,18 @@ module Jerbil
 
     create_alias_for :g, :debug
     
-    def initialize(name)   
+    def initialize(name, files = nil)   
       @name = name
       @verbose = false
+			@java_files = files
     
       yield self if block_given?
+			
+			raise "need java_files" if java_files.nil?
+			
       depends_on java_files.dstdir
+			#CLEAN.include(java_files.dstdir) if CLEAN
+			
       define     
     end
     

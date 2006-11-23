@@ -1,4 +1,4 @@
-= Jerbil -- Java build system based on Rake[http://rake.rubyforge.org] and RJB
+= Jerbil -- Java build system based on Rake[http://rake.rubyforge.org] and Rjb
 
   "If I knew then what I know now, I would have tried using a real
   scripting language, such as JavaScript via the Rhino component or
@@ -10,22 +10,23 @@
   
     -- James Duncan Davidson, creator of Apache Ant
  
-This package contains several TaskLibs for Rake which can be
+This package contains several TaskLibs for Rake[http://rake.rubyforge.org] which can be
 used to build Java projects. 
 
-Jerbil uses RJB[http://raa.ruby-lang.org/project/rjb/]
-(Ruby-Java-Bridge) to load a Java virtual machine into Rake.
+Jerbil uses Rjb[http://rjb.rubyforge.org/]
+(Ruby-Java-Bridge) to load a Java virtual machine into the Ruby process running Rake.
 
-The jvm is then used to compile Java source files, create javadocs etc.
+The JVM is then used to compile Java source files, create javadocs etc.
 It is not a complete replacement for ant (yet), but has several advantages such as
-extremly compact build files and easy scriptability. 
+extremly compact build files and easy scriptability.
 
 The main focus at the moment are small to medium-sized projects using 
 testng[http://testng.org] and hibernate[http://hibernate.org].
 
 == Requirements
 
-Jerbil requires rubygems[http://rubygems.org], Rake, RJB and JDK 1.5. 
+Jerbil requires rubygems[http://rubygems.org], Rake, Rjb, builder[http://builder.rubyforge.org/]
+and JDK 1.5. 
 
 == Installation
 
@@ -33,12 +34,13 @@ You need to have Ruby and rubygems installed. On Debian systems (testing) this i
   
   % apt-get install rubygems
   
-Rake and rjb are best installed using gem:
+Rake, Rjb and builder are best installed using gem:
 
   % gem install rake
   % gem install rjb
+  % gem install builder
   
-The installation of rjb requires that the JDK is installed and JAVA_HOME set up
+The installation of Rjb requires that the JDK is installed and JAVA_HOME set up
 accordingly. Finally jerbil needs to be installed:
 
   % gem install jerbil --source http://code.trampolinesystems.com
@@ -46,23 +48,55 @@ accordingly. Finally jerbil needs to be installed:
 Jerbil might become an 'official' rubygem at some later point. Note that some tasks require additional
 jar files, for example Jerbil::TestNG::TestNGTask.
 
-The source code is available via subversion: http://svn.trampolinesystems.com/jerbil/
+The source code is available via subversion: http://svn.trampolinesystems.com/jerbil/trunk
   
+== Usage
+
+A minimal Rakefile to compile Java files looks like this:
+
+	require 'jerbil'
+	
+	CLASSPATH = FileList[ "./lib/*.jar" ]
+	BUILD_DIR = "build"
+	FILES     = JavaFileList.new("src", BUILD_DIR)
+	
+	load_jvm(CLASSPATH, BUILD_DIR)
+	
+	Jerbil::JavacTask.new(:compile, FILES) 
+
+The JVM gets loaded once via the +load_jvm+ method. This initialization step is
+required, otherwise the task will fail. <tt>Jerbil::JavacTask.new(:compile, FILES)</tt>
+defines a new task (<tt>:compile</tt>) which will compile all Java files found in directory
++src+ to +build+.
+
 == Example
 
-See the example/[http://svn.trampolinesystems.com/jerbil/trunk/example] subdirectory in the repository.
+See the example/[http://svn.trampolinesystems.com/jerbil/trunk/example] subdirectory
+in the repository.
 
   % svn co http://svn.trampolinesystems.com/jerbil/trunk/example
 
 == Advantages over Ant
 
-Well, it's based on Ruby :) Additionally, RJB allows Ruby code to implement arbitary
-Java interfaces which you can then pass into compiled Java code.  
-See Jerbil::TestNG::TestListener for an example.
+See Martin Fowler's article[http://www.martinfowler.com/articles/rake.html] for a detailed
+discussion on Rake vs. Ant. Besides the more compact build scripts you also get ability to
+implement arbitrary Java interfaces in Ruby (see Jerbil::TestNG::TestListener for an example).
+Another possibility is build script metaprogramming, i.e. creating your tasks programmatically:
+
+  MODULES = [ "common", "core", "server" ]
+  MODULES.each_with_index do |m,i|
+    Jerbil::JavacTask.new("compile_#{m}") do |jct|
+      jct.java_files = JavaFileList.new(File.join(m,SOURCE_DIR), JAVA_BUILD_DIR)
+      MODULES[0..i-1].each {|prev| jct.depends_on "compile_#{prev}" } if i>0
+    end
+  end
+
+This snippet creates several build targets (:compile_common, :compile_core, :compile_server) 
+including correct dependencies.
 
 == Related projects
 
-* Raven[http://raven.rubyforge.org/]: similar to jerbil in scope, but different approach (invokes 
+* Raven[http://raven.rubyforge.org/]: similar to Jerbil in scope, but different approach (invokes 
   javac directly, no Java-Ruby integration).
  
 == FAQ
@@ -71,7 +105,6 @@ See JerbilFAQ[http://code.trampolinesystems.com/jerbil/wiki/JerbilFAQ].
 
 == Contact
 
-Questions? Feedback?
 mailto:jan@trampolinesystems.com
 
 == License

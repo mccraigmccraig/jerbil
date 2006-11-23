@@ -409,10 +409,10 @@ module Rake
   end
 end
 
-# make some stuff available to the toplevel
-
+# make JavaFileList available to toplevel
 JavaFileList = Jerbil::JavaFileList
 
+# make load_jvm available to toplevel
 def load_jvm(args, build_dir, options={})
 	Jerbil::JavaHelper.load_jvm(args, build_dir, options)			
 end
