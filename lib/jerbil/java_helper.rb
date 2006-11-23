@@ -128,8 +128,9 @@ module Jerbil
 	  java_opts = ENV['JAVA_OPTS'] || options[:java_opts]
 	  jvmargs.unshift(java_opts) if java_opts
 	  
-	  puts jvmargs
-      begin
+	  puts jvmargs if ENV['JERBIL_DEBUG']
+      
+	  begin
         Rjb::load(classpath.to_cp, jvmargs)
       rescue 
         $stderr << "could not load java vm: make sure JAVA_HOME is set correctly!\n"
