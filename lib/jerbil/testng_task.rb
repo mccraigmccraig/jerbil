@@ -1,6 +1,7 @@
 require 'rake'
 require 'rake/tasklib'
 require 'set'
+require 'builder'
 require 'jerbil/java_helper'
 
 module Jerbil
@@ -108,14 +109,13 @@ module Jerbil
         end
         
         def onTestFailure(result)
-          $stderr.print "X"
+          $stderr.print "F" unless Rake.application.options.trace
           
           @failed_classes.add result.getTestClass.getName
           begin
-            log get_test_name(result)
+            log "Failure: " + get_test_name(result)
             log result.getThrowable.getMessage
-            trace = printStream_to_s {|ps| result.getThrowable.printStackTrace(ps) }
-            log trace
+            log printStream_to_s {|ps| result.getThrowable.printStackTrace(ps) }
             log "------------------------------------------------------------------------"
           rescue 
             $stderr.puts $!
@@ -123,6 +123,7 @@ module Jerbil
         end
         
         def onTestSkipped(result)
+		  $stderr.print "S" unless Rake.application.options.trace
           log "skipped test " + get_test_name(result)
         end
         
@@ -132,7 +133,7 @@ module Jerbil
         end
         
         def onTestSuccess(result)
-          $stderr.print "."       
+          $stderr.print "." unless Rake.application.options.trace      
         end
      
         # Returns a list of all failed classes.
@@ -180,8 +181,6 @@ module Jerbil
         # +onetest+:: whether all tests should be rolled into one.
         # +excluded+:: classes excluded from the test.
         def create_suite_xml(filename, classnames, suitename="default", onetest=false, excluded = [])
-          require 'builder'
-          
           File.open(filename, 'w') do |suitexml|
             xml = Builder::XmlMarkup.new(:target=>suitexml, :indent=>4)
             xml.instruct!

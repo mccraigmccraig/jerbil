@@ -72,24 +72,28 @@ module Jerbil
     end
     
     # Loads the java virtual machine. This method should only be invoked once, typically
-    # before task definitions in a Rakefile.
+    # before task definitions in a Rakefile. If the environment variable +JAVA_OPTS+ is
+	# set, it will be treated as extra parameter for the initial VM load.
     #
     # +classpath+:: a Rake::FileList containing the initial classpath. 
-    # +build_dir+:: an optional directory (or list of directories) which will be used to resolve classes at runtime.
-    # +loggingprops+:: the location of a java.util.logging configuration file.
-    def load_jvm(classpath, build_dir = nil, loggingprops = nil ) 
+	# +build_dir+:: an optional directory (or list of directories) which will be used to resolve classes at runtime.
+	# Available options:
+	# +:java_home+:: JDK path (defaults to ENV['JAVA_HOME']
+	# +:java_opts+:: additional JVM arguments (defaults to ENV['JAVA_OPTS']
+	# +:loggingprops+:: the location of a java.util.logging configuration file.
+    def load_jvm(classpath, build_dir = nil, options = {} ) 
       #need verbose java exceptions
       $VERBOSE = true
-    
+   
       #include tools.jar from JDK (needed for javac etc.)
-      java_home = ENV['JAVA_HOME']
+      java_home = ENV['JAVA_HOME'] || options[:java_home] 
       classpath.include(File.join(java_home, "lib", "tools.jar")) if java_home    
       #include build jars and custom classloader
       classpath.include(File.join(File.dirname(__FILE__), "../../buildsupport/*.jar"))
-      classpath.include(File.join(File.dirname(__FILE__), "../../classloader")) unless build_dir.nil?
+      classpath.include(File.join(File.dirname(__FILE__), "../../classloader")) if build_dir
       
       jvmargs = []    
-      jvmargs << "-Djava.util.logging.config.file=#{loggingprops.to_s}" unless loggingprops.nil? 
+      jvmargs << "-Djava.util.logging.config.file=#{options[:loggingprops].to_s}" if options[:loggingprops] 
        
       if JAVA_DEBUG || ENV['JAVA_DEBUG']
         suspend = ENV['JAVA_DEBUG'].to_s.index('suspend') ? 'y' : 'n'
@@ -114,6 +118,9 @@ module Jerbil
         $stderr << "jerbil: build_dir not set: dynamic classloading is disabled\n" if Rake.application.options.trace
       end
            
+	  java_opts = ENV['JAVA_OPTS'] || options[:java_opts]
+	  jvmargs.unshift(java_opts) if java_opts
+	  
       begin
         Rjb::load(classpath.to_cp, jvmargs)
       rescue 
