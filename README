@@ -1,4 +1,4 @@
-= Jerbil -- Java build exensions for Rake
+= Jerbil -- Java build extensions for Rake
 
   "If I knew then what I know now, I would have tried using a real
   scripting language, such as JavaScript via the Rhino component or
@@ -25,8 +25,8 @@ testng[http://testng.org] and hibernate[http://hibernate.org].
 
 == Requirements
 
-Jerbil requires rubygems[http://rubygems.org], Rake, Rjb, builder[http://builder.rubyforge.org/]
-and JDK 1.5. 
+Jerbil requires rubygems[http://rubygems.org], Rake, Rjb[http://rjb.rubyforge.org/],
+builder[http://builder.rubyforge.org/] and JDK 1.5. 
 
 == Installation
 
