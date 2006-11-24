@@ -5,7 +5,7 @@ require 'rake/rdoctask'
 require 'rake/clean'
 
 CLEAN.include('pkg')
-WWWROOT   = "/var/www/code.trampolinesystems.com/"
+
 FILES     = FileList['lib/**/*', 'test/*.rb', 'classloader/*', 'LICENSE', 'TODO', 'CHANGES', 'README']
 FULLFILES = FILES.clone.include('buildsupport/**/*', 'example/**/*' )
 TESTFILES = FileList['test/test_java_helper.rb']
@@ -91,22 +91,8 @@ task :compile_classloader do |t|
   end
 end
 
-desc "publish documentation"
-task :publish_doc  do |t|
-  `scp -r html/* trampolinesystems.com:#{WWWROOT}/doc/jerbil/`
-end
-task :publish_doc => :rerdoc
-
-task :copy_gem do |t|
-  `scp pkg/* trampolinesystems.com:#{WWWROOT}/gems` 
-end
-task :copy_gem => :repackage
-
-task :update_gem_index do |t|
-  `ssh trampolinesystems.com generate_yaml_index -d #{WWWROOT}`
+begin
+    require 'maintainer'
+rescue LoadError
 end
 
-desc "publish gem"
-task :publish_gem => [:copy_gem, :update_gem_index]
-
-task :dist => [ :compile_classloader, :publish_gem, :publish_doc ]

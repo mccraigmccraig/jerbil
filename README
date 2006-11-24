@@ -1,4 +1,4 @@
-= Jerbil -- Java build system based on Rake[http://rake.rubyforge.org] and Rjb
+= Jerbil -- Java build exensions for Rake
 
   "If I knew then what I know now, I would have tried using a real
   scripting language, such as JavaScript via the Rhino component or
@@ -10,7 +10,7 @@
   
     -- James Duncan Davidson, creator of Apache Ant
  
-This package contains several TaskLibs for Rake[http://rake.rubyforge.org] which can be
+This package contains several tasklibs for Rake[http://rake.rubyforge.org] which can be
 used to build Java projects. 
 
 Jerbil uses Rjb[http://rjb.rubyforge.org/]
@@ -94,6 +94,10 @@ Another possibility is build script metaprogramming, i.e. creating your tasks pr
 This snippet creates several build targets (:compile_common, :compile_core, :compile_server) 
 including correct dependencies.
 
+Lastly, all the tasks run in one single JVM, speeding up the build significantly.
+However this is actually a trade-off as state isolation is not guaranteed between
+subsequently run tasks. This shouldn't be a problem in most cases though.
+
 == Related projects
 
 * Raven[http://raven.rubyforge.org/]: similar to Jerbil in scope, but different approach (invokes 
@@ -101,8 +105,12 @@ including correct dependencies.
  
 == FAQ
 
-See JerbilFAQ[http://code.trampolinesystems.com/jerbil/wiki/JerbilFAQ].
+See FAQ[http://code.trampolinesystems.com/jerbil/wiki/FAQ].
 
+== Project homepage
+
+http://code.trampolinesystems.com/jerbil
+ 
 == Contact
 
 mailto:jan@trampolinesystems.com
