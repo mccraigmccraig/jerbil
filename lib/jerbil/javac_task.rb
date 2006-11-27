@@ -46,16 +46,20 @@ module Jerbil
           parms  = [ "-d", java_files.dstdir ]
           parms += [ "-sourcepath", java_files.sourcepath ] if java_files.sourcepath 
           
-          parms << "-verbose" if verbose
+          parms << "-verbose" if verbose              
+          parms += extra_args.collect {|a|a.to_s} if extra_args
           
+          files = gather_filenames
+             
           # must do this to prevent javac bombing out on the file package-info.java
           # due to known javac bug 6198196 -
-          # http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6198196
-          java_files.gsub!( "/", "\\" ) if Jerbil::IS_WINDOWS
-                 
-          parms += extra_args.collect {|a|a.to_s} if extra_args        
-          parms += gather_filenames    
-           
+          # http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6198196        
+          if Jerbil::IS_WINDOWS
+            files.map! {|fn| fn.sub("/", "\\")}
+          end
+          
+          parms += files 
+          
           #require 'pp'
           #pp parms
           

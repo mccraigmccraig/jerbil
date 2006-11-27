@@ -11,9 +11,7 @@ require 'fileutils'
 
 module Jerbil
   IS_WINDOWS = RUBY_PLATFORM =~ /mswin|mingw/i
-  JAVA_PATH_SEPERATOR = IS_WINDOWS ? ';' : ':'
-  DIR_SEP = IS_WINDOWS ? "\\" : "/"
-  DIR_SEP_FOR_SUBSTITUTION = IS_WINDOWS ? "\\\\" : "/"
+  JAVA_PATH_SEPARATOR = File::PATH_SEPARATOR
   
   # The JavaHelper module provides common helper functionality needed across different
   # classes.
@@ -227,18 +225,15 @@ module Jerbil
     # Returns a list of all java source files formatted as java class names.
     # For example src/org/foo/Baz -> org.foo.Baz.
     def to_classnames
-      # remove the initial directory and separator
-      sub = srcdir + DIR_SEP_FOR_SUBSTITUTION
-      paths = self.pathmap("%{^#{sub},}X")
-      
-      paths.gsub!(DIR_SEP, ".")
-      #paths.gsub!("/", "." )
+      # remove the initial directory and separator     
+      paths = self.pathmap("%{^#{srcdir_quoted}/?,}X")
+      paths.gsub!("/", ".")
     end
     
     # Returns a list of Java classes. This method uses Rjb::import to
     # load the specified classes into the virtual machine.
     def to_classes
-      classnames = to_classnames
+      classnames = to_classnames      
       classes = classnames.map {|name| Rjb::import(name)}
       classes.to_a
     end
@@ -248,7 +243,7 @@ module Jerbil
     #
     # For example src/org/foo/Baz.java -> classes/org/foo/Baz.class.
     def to_classfiles
-      self.pathmap("%{^#{srcdir},#{dstdir}}X.class")
+      self.pathmap("%{^#{srcdir_quoted},#{dstdir}}X.class")
     end
     
     def sourcepath
@@ -272,9 +267,9 @@ module Jerbil
     
     # Calls block once for each resource found in +srcdir+, passing
     # the source and destination file as parameter.
-    def resource_and_target # :yields: resource,target
+    def resource_and_target # :yields: resource,target   
       resources.each do | r |
-        target =  r.sub(/#{srcdir}/, dstdir)
+        target =  r.sub(/#{srcdir_quoted}/, dstdir)
         yield r, target if block_given?
       end
     end
@@ -283,9 +278,9 @@ module Jerbil
     # file.
     def source_and_target    # :yields: src,target
       self.each do |file|
-          yield file, file.pathmap("%{^#{srcdir},#{dstdir}}X.class")
+          yield file, file.pathmap("%{^#{srcdir_quoted},#{dstdir}}X.class")
       end      
-    end
+    end        
     
     def out_of_date
       return self.to_a unless (File.exists?(dstdir) and Dir.entries(dstdir).length > 2)      
@@ -313,6 +308,11 @@ module Jerbil
     def add_extensions(exts)
       exts.to_a.each {|ext| add_extension(ext)}      
     end    
+    
+    private 
+    def srcdir_quoted
+      Regexp.quote(srcdir)
+    end
   end
   
   ######################################################################
@@ -341,7 +341,7 @@ module Jerbil
     end
     
     def sourcepath
-      self.srcdir.join(JAVA_PATH_SEPERATOR)
+      self.srcdir.join(JAVA_PATH_SEPARATOR)
     end
     
     def srcdir
@@ -406,7 +406,7 @@ module Rake
   class FileList  
     # Returns the filelist formatted as Java classpath.
     # ("/tmp/foo.jar:/tmp/baz.jar")
-    def to_cp(sep = Jerbil::JAVA_PATH_SEPERATOR)
+    def to_cp(sep = Jerbil::JAVA_PATH_SEPARATOR)
       self.join(sep)
     end
   end

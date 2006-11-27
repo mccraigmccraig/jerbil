@@ -29,6 +29,7 @@ module Jerbil
       assert_equal 'java.lang.String', cf[0].getName
       assert_equal 'java.util.Map', cf[1].getName
     end
+    
   
     def test_to_cp
       flist = FileList["ab.jar", "cd.jar", "ef.jar"]          
@@ -37,9 +38,22 @@ module Jerbil
     end
     
     def test_javafiles
-      flist = JavaFileList.new(File.join(File.dirname(__FILE__), "../example/src"), "../example/build")
-      assert_equal 5, flist.to_classnames.length, flist.to_classnames
+      flist = JavaFileList.new(
+        File.join(File.dirname(__FILE__), "..", "example", "src"),
+        File.join(File.dirname(__FILE__), "..", "example", "build"))
+      
+      classnames = flist.to_classnames
+      assert_equal 5, classnames.length, classnames
       assert_equal 1, flist.resources.length, flist.resources
+          
+      assert_equal ['jerbil.example.JerbilEntity', 
+        'jerbil.example.Jerbiliser',
+        'jerbil.example.Main',
+        'jerbil.example.Main2',
+        'jerbil.example.MyAnnotation'], classnames.sort
+    
+      #assert_equal ['./../example/src/jerbil/example/example.properties'], 
+      #  flist.resources.sort
       
       #flist.source_and_target do |s,t|
       #  puts "#{s} ==> #{t}"
