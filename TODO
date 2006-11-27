@@ -2,5 +2,6 @@
 
 === To Do
 * JUnit integration
+* running java with fork==false not supported on Mac OS X!
 
 

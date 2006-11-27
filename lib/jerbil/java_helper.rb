@@ -10,9 +10,6 @@ end
 require 'fileutils'
 
 module Jerbil
-  # for some really weird reasons schemaexport fails on mac os x
-  # if java is not running in debug mode
-  JAVA_DEBUG = ::RUBY_PLATFORM =~ /darwin/i || false
   IS_WINDOWS = RUBY_PLATFORM =~ /mswin|mingw/i
   JAVA_PATH_SEPERATOR = IS_WINDOWS ? ';' : ':'
   DIR_SEP = IS_WINDOWS ? "\\" : "/"
@@ -105,7 +102,7 @@ module Jerbil
       jvmargs << "-ea" if options[:enableassert]
       jvmargs << "-Djava.util.logging.config.file=#{options[:loggingprops].to_s}" if options[:loggingprops] 
        
-      if JAVA_DEBUG || ENV['JAVA_DEBUG']
+      if ENV['JAVA_DEBUG']
         suspend = ENV['JAVA_DEBUG'].to_s.index('suspend') ? 'y' : 'n'
         jvmargs += [
         "-Xdebug",
