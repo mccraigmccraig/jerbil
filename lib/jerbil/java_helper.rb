@@ -89,14 +89,13 @@ module Jerbil
 	  
       #need verbose java exceptions
       $VERBOSE = true
-   
-      #include tools.jar from JDK (needed for javac etc.)
-      guess_java_home
-      
-      java_home =  options[:java_home] || ENV['JAVA_HOME']
+    
+      guess_java_home  
+      java_home = options[:java_home] || ENV['JAVA_HOME']
       
       puts "using JDK in #{java_home}" if Rake.application.options.trace
       
+      #include tools.jar from JDK (needed for javac etc.)
       classpath.include(File.join(java_home, "lib", "tools.jar")) if java_home    
       #include custom classloader
       classpath.include(File.join(File.dirname(__FILE__), "../../classloader")) if build_dir
@@ -107,18 +106,17 @@ module Jerbil
        
       if ENV['JAVA_DEBUG']
         suspend = ENV['JAVA_DEBUG'].to_s.index('suspend') ? 'y' : 'n'
+        port = 8000
+        if ENV['JAVA_DEBUG'] =~ /port=([0-9]+)/
+          port = $1
+        end
+       
         jvmargs += [
         "-Xdebug",
         "-Xnoagent",
-        "-Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=#{suspend}" ]
+        "-Xrunjdwp:transport=dt_socket,address=#{port},server=y,suspend=#{suspend}" ]
       end
-      
-      #java_home = ENV['JAVA_HOME']    
-      #ENV['LD_LIBRARY_PATH'] = "#{java_home}/jre/lib/i386:#{java_home}/jre/lib/i386/client"
-      
-      #puts "lib:" + ENV['LD_LIBRARY_PATH']
-      #jvmargs << "-Djava.library.path=#{ENV['JAVA_HOME']}/jre/lib/i386"
-      
+         
       if build_dir
         jerbil_debug = ENV['JERBIL_DEBUG'] ? 'true' : 'false'
         

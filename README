@@ -30,19 +30,22 @@ builder[http://builder.rubyforge.org/] and JDK 1.5.
 
 == Installation
 
-You need to have Ruby and rubygems installed. The Windows version of Ruby already ships with gem.
-On Debian systems (testing) you can install it using apt-get:
+You need to have Ruby and rubygems installed. The Windows version of Ruby already ships with rubygems 
+preinstalled. On Debian systems (testing) you can install it using apt-get:
   
   % apt-get install rubygems
   
 Rake, Rjb and builder are best installed using gem:
 
   % gem install rake
-  % gem install rjb
   % gem install builder
+  % gem install rjb
   
-The installation of Rjb requires that the JDK is installed and JAVA_HOME set up
-accordingly. Finally jerbil needs to be installed:
+The installation of Rjb can be a bit tricky for non-Windows users because 
+JAVA_HOME needs to be set up correctly. Also, a C compiler is required in order to 
+build the JNI extension for Ruby.
+
+Finally jerbil needs to be installed:
 
   % gem install jerbil --source http://code.trampolinesystems.com
 
@@ -65,17 +68,34 @@ A minimal Rakefile to compile Java files could look like this:
 	
 	Jerbil::JavacTask.new(:compile, FILES) 
 
-The JVM gets loaded once via the +load_jvm+ method. This initialization step is
+The JVM gets loaded once via the Jerbil::JavaHelper load_jvm method. This initialization step is
 required, otherwise the task will fail. <tt>Jerbil::JavacTask.new(:compile, FILES)</tt>
 defines a new task (<tt>:compile</tt>) which will compile all Java files found in directory
 +src+ to +build+.
 
+=== Debugging
+
+As all the code runs in a single JVM, debugging can only be enabled on a global level.
+Just add the environment variable +JAVA_DEBUG+. 
+
+  % JAVA_DEBUG='1' rake test
+
+This will load the JVM in debug mode, listening on port 8000. To specify a different port,
+use JAVA_DEBUG='port=33333'. Adding +suspend+ to the +JAVA_DEBUG+ environment will suspend execution
+until the debugging client connects.
+
+=== Specifiying additional jvm options
+
+  % JAVA_OPTS = '-Xmx=256M' rake test
+or
+  load_jvm(CLASSPATH, BUILD, :java_opts=>"-Xmx=256M")
+  
 == Example
 
 See the example/[http://svn.trampolinesystems.com/jerbil/trunk/example] subdirectory
 in the repository.
 
-  % svn checkout http://svn.trampolinesystems.com/jerbil/trunk/example
+  % svn co http://svn.trampolinesystems.com/jerbil/trunk/example
 
 == Advantages over Ant
 
@@ -86,14 +106,16 @@ Another possibility is build script metaprogramming, i.e. creating your tasks pr
 
   MODULES = [ "common", "core", "server" ]
   MODULES.each_with_index do |m,i|
-    Jerbil::JavacTask.new("compile_#{m}") do |jct|
-      jct.java_files = JavaFileList.new(File.join(m,SOURCE_DIR), JAVA_BUILD_DIR)
-      MODULES[0..i-1].each {|prev| jct.depends_on "compile_#{prev}" } if i>0
+    Jerbil::JavacTask.new("compile_#{m}") do |t|
+      t.java_files = JavaFileList.new(File.join(m,SRC_DIR), DST_DIR)
+      MODULES[0..i-1].each {
+        |prev| t.depends_on "compile_#{prev}" 
+      } if i>0
     end
   end
 
-This snippet creates several build targets (:compile_common, :compile_core, :compile_server) 
-including correct dependencies.
+This snippet creates several build targets (+:compile_common+, +:compile_core+,
++:compile_server+) including correct dependency setup.
 
 Lastly, all the tasks run in one single JVM, speeding up the build significantly.
 However this is actually a trade-off as state isolation is not guaranteed between
