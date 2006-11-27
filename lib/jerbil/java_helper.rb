@@ -73,33 +73,36 @@ module Jerbil
     
     # Loads the java virtual machine. This method should only be invoked once, typically
     # before task definitions in a Rakefile. If the environment variable +JAVA_OPTS+ is
-	# set, it will be treated as extra parameter for the initial VM load.
+    # set, it will be treated as extra parameter for the initial VM load.
     #
     # +classpath+:: a Rake::FileList containing the initial classpath. 
-	# +build_dir+:: an optional directory (or list of directories) which will be used to resolve classes at runtime.
-	# Available options:
-	# +:java_home+:: JDK path (defaults to ENV['JAVA_HOME']
-	# +:java_opts+:: additional JVM arguments (defaults to ENV['JAVA_OPTS']
-	# +:loggingprops+:: the location of a java.util.logging configuration file.
-	# +:enableassert+:: wheter to enable assertions (default: enabled)
+    # +build_dir+:: an optional directory (or list of directories) which will be used to resolve classes at runtime.
+	  # Available options:
+	  # +:java_home+:: JDK path (defaults to ENV['JAVA_HOME']
+	  # +:java_opts+:: additional JVM arguments (defaults to ENV['JAVA_OPTS']
+	  # +:loggingprops+:: the location of a java.util.logging configuration file.
+	  # +:enableassert+:: wheter to enable assertions (default: enabled)
     def JavaHelper.load_jvm(classpath, build_dir = nil, options = {} )
 			
-	  defaultopts = { :enableassert => true }
-	  options = defaultopts.merge(options.dup)
+	    defaultopts = { :enableassert => true }
+      options = defaultopts.merge(options.dup)
 	  
       #need verbose java exceptions
       $VERBOSE = true
    
       #include tools.jar from JDK (needed for javac etc.)
-      java_home = ENV['JAVA_HOME'] || options[:java_home] 
+      guess_java_home
+      
+      java_home =  options[:java_home] || ENV['JAVA_HOME']
+      
+      puts "using JDK in #{java_home}" if Rake.application.options.trace
+      
       classpath.include(File.join(java_home, "lib", "tools.jar")) if java_home    
-      #include build jars and custom classloader
-      classpath.include(File.join(File.dirname(__FILE__), "../../buildsupport/*.jar"))
+      #include custom classloader
       classpath.include(File.join(File.dirname(__FILE__), "../../classloader")) if build_dir
       
-	  
       jvmargs = []    
-	  jvmargs << "-ea" if options[:enableassert]
+      jvmargs << "-ea" if options[:enableassert]
       jvmargs << "-Djava.util.logging.config.file=#{options[:loggingprops].to_s}" if options[:loggingprops] 
        
       if JAVA_DEBUG || ENV['JAVA_DEBUG']
@@ -125,21 +128,35 @@ module Jerbil
         $stderr << "jerbil: build_dir not set: dynamic classloading is disabled\n" if Rake.application.options.trace
       end
            
-	  java_opts = ENV['JAVA_OPTS'] || options[:java_opts]
-	  jvmargs.unshift(java_opts) if java_opts
-	  
-	  puts jvmargs if ENV['JERBIL_DEBUG']
+      java_opts = ENV['JAVA_OPTS'] || options[:java_opts]
+      jvmargs.unshift(java_opts) if java_opts
       
-	  begin
+      puts jvmargs if ENV['JERBIL_DEBUG']
+           
+      begin
         Rjb::load(classpath.to_cp, jvmargs)
-      rescue 
+      rescue  
         $stderr << "could not load java vm: make sure JAVA_HOME is set correctly!\n"
         raise
       end
      
       #TODO: test javac main and raise if not found
     end
-  end
+  
+    # Tries to guess the JDK path if JAVA_HOME is not set (Windows only). 
+    def JavaHelper.guess_java_home     
+        if ENV['JAVA_HOME'].nil? && IS_WINDOWS
+          begin
+            require 'win32/registry'
+            Win32::Registry::HKEY_LOCAL_MACHINE.open('SOFTWARE\JavaSoft\Java Development Kit\1.5') do |reg|
+              ENV['JAVA_HOME'] = reg['JavaHome']
+            end
+          rescue  
+          end
+        end
+    end
+    
+  end # module JavaHelper
   
   ######################################################################
   # Tasks including this module can easily specify additional

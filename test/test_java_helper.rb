@@ -19,6 +19,7 @@ module Jerbil
     end
   
     def test_to_classes
+      JavaHelper.guess_java_home
       flist = JavaFileList.new("src","dst")
       flist.add("java/lang/String.java")
       flist.add("java/util/Map.java")
