@@ -76,7 +76,7 @@ module Jerbil
      end
      
      protected
-     def define
+     def define # :nodoc:
         #desc "run #{classname}" if Rake.application.last_comment.nil?      
         task name => dependencies do |t|
        

@@ -21,7 +21,10 @@ module Jerbil
   #  end
   class AptTask < JavacTask
 
+		# A hash containing annotation types and handlers (code blocks).
     attr_accessor :annotations
+		
+		# Only process annotations, don't compile anything.
     attr_accessor :nocompile
     
     def initialize(name)

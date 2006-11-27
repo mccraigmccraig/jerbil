@@ -83,7 +83,7 @@ Jerbil::JavaTask.new(:test_java_task, "jerbil.example.Main2") do |t|
 end
 
 file ANNOTATED_CLASSES => [ :find_annotations ]
-file PERSISTENCE_YML   => [ :find_annotations ]
+file ENTITIES_YML   => [ :find_annotations ]
 desc "find annotations and write output to #{ANNOTATED_CLASSES}"
 Jerbil::AptTask.new(:find_annotations) do |t|
   t.java_files= JAVA_FILES
@@ -92,12 +92,12 @@ Jerbil::AptTask.new(:find_annotations) do |t|
   t.find_annotation 'jerbil.example.MyAnnotation' do |classes|
     File.open(ANNOTATED_CLASSES, 'w') { |f| f << classes.to_yaml }
   end
-  t.annotated_classes_to_yaml('javax.persistence.Entity', PERSISTENCE_YML)
+  t.annotated_classes_to_yaml('javax.persistence.Entity', ENTITIES_YML)
 end
 
 
 desc "create sql schema from annotations"
 Jerbil::Hibernate::ExportSchemaTask.new(:export_schema) do |t|
   t.schemafile = DB_SCHEMA
-  t.persistencefile = PERSISTENCE_YML
+  t.entities_yml = ENTITIES_YML
 end

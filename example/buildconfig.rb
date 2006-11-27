@@ -13,4 +13,4 @@ ANNOTATED_CLASSES   = File.join(BUILD_DIR, "annotated-classes.yml")
 
 CLASSPATH           = FileList["./#{JAVA_BUILD_DIR}", "./lib/*.jar" ]
 DB_SCHEMA           = File.join(BUILD_DIR, "schema.sql")
-PERSISTENCE_YML     = File.join(BUILD_DIR, "persistence.yml")
+ENTITIES_YML	      = File.join(BUILD_DIR, "entities.yml")

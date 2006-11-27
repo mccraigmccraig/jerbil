@@ -23,7 +23,7 @@ module Jerbil
       define
     end
     
-    def define
+    def define # :nodoc:
       jardir = File.dirname(filename)
       depends_on jardir
       task name => dependencies do |t|

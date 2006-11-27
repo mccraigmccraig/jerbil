@@ -63,6 +63,7 @@ Rake::RDocTask.new do |rdoc|
   rdoc.options << '--line-numbers' << '--inline-source' << '--main' << 'README'
   rdoc.rdoc_files.include("README", "CHANGES", "TODO", "LICENSE", "lib/**/*.rb")
 	rdoc.rdoc_dir = 'rdoc'
+  rdoc.template = 'externals/allison/allison.rb'
 end
   
 Rake::TestTask.new do |t|

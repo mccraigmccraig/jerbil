@@ -4,21 +4,25 @@ require 'jerbil/java_helper'
 
 module Jerbil
   # Compiles Java source files. 
-  # The location of the source files and the destionation directory is encapsulated
-  # in a JavaFileList.
+  # The location of the source files and the destination directory is specified
+  # by a JavaFileList.
   #
   # == Example
   #
   #  desc "compile all java files"
   #  Jerbil::JavacTask.new(:compile) do |t|
-  #    t.java_files = Jerbil::JavaFileList.new("src", "classes")
+  #    t.java_files = JavaFileList.new("src", "classes")
   #    t.options :nowarn, :debug
   #  end
   class JavacTask < Rake::TaskLib
     include JavaHelper, ExtraArgumentTaking
     
     attr_accessor :name
+		
+		# A JavaFileList, specifying what to compile and where
+		# to write the output to.
     attr_accessor :java_files
+		
     attr_accessor :verbose
 
     create_alias_for :g, :debug
@@ -38,7 +42,7 @@ module Jerbil
       define     
     end
     
-    def define
+    def define # :nodoc:
 	    desc "compile files in #{java_files.srcdir.to_a.join(', ')}" if Rake.application.last_comment.nil?     
       task name => dependencies do |t|
           

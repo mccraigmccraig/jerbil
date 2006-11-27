@@ -27,7 +27,7 @@ module Jerbil
       define
      end
      
-     def define
+     def define # :nodoc:
       desc "generate javadocs" if Rake.application.last_comment.nil?
       task name => dependencies do |t|
         javadoc = Rjb::import('com.sun.tools.javadoc.Main')    

@@ -30,7 +30,8 @@ builder[http://builder.rubyforge.org/] and JDK 1.5.
 
 == Installation
 
-You need to have Ruby and rubygems installed. On Debian systems (testing) this is a simple as:
+You need to have Ruby and rubygems installed. The Windows version of Ruby already ships with gem.
+On Debian systems (testing) you can install it using apt-get:
   
   % apt-get install rubygems
   
@@ -52,7 +53,7 @@ The source code is available via subversion: http://svn.trampolinesystems.com/je
   
 == Usage
 
-A minimal Rakefile to compile Java files looks like this:
+A minimal Rakefile to compile Java files could look like this:
 
 	require 'jerbil'
 	
@@ -74,13 +75,13 @@ defines a new task (<tt>:compile</tt>) which will compile all Java files found i
 See the example/[http://svn.trampolinesystems.com/jerbil/trunk/example] subdirectory
 in the repository.
 
-  % svn co http://svn.trampolinesystems.com/jerbil/trunk/example
+  % svn checkout http://svn.trampolinesystems.com/jerbil/trunk/example
 
 == Advantages over Ant
 
 See Martin Fowler's article[http://www.martinfowler.com/articles/rake.html] for a detailed
 discussion on Rake vs. Ant. Besides the more compact build scripts you also get ability to
-implement arbitrary Java interfaces in Ruby (see Jerbil::TestNG::TestListener for an example).
+implement arbitrary Java interfaces in Ruby (see Jerbil::TestNG::DefaultTestListener for an example).
 Another possibility is build script metaprogramming, i.e. creating your tasks programmatically:
 
   MODULES = [ "common", "core", "server" ]
@@ -101,7 +102,7 @@ subsequently run tasks. This shouldn't be a problem in most cases though.
 == Related projects
 
 * Raven[http://raven.rubyforge.org/]: similar to Jerbil in scope, but different approach (invokes 
-  javac directly, no Java-Ruby integration).
+  javac externally, no Java-Ruby integration).
  
 == FAQ
 

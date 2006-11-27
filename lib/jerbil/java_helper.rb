@@ -73,10 +73,15 @@ module Jerbil
     # +classpath+:: a Rake::FileList containing the initial classpath. 
     # +build_dir+:: an optional directory (or list of directories) which will be used to resolve classes at runtime.
 	  # Available options:
-	  # +:java_home+:: JDK path (defaults to ENV['JAVA_HOME']
-	  # +:java_opts+:: additional JVM arguments (defaults to ENV['JAVA_OPTS']
-	  # +:loggingprops+:: the location of a java.util.logging configuration file.
-	  # +:enableassert+:: wheter to enable assertions (default: enabled)
+	  # +java_home+:: JDK path (defaults to ENV['JAVA_HOME'])
+	  # +java_opts+:: additional JVM arguments (defaults to ENV['JAVA_OPTS'])
+	  # +loggingprops+:: the location of a java.util.logging configuration file.
+	  # +enableassert+:: wheter to enable assertions (default: enabled)
+		#
+		# ==Example
+		#
+		#		load_jvm(FileList.new("lib/*.jar"), "build", :loggingprops => "logging.properties")
+		#
     def JavaHelper.load_jvm(classpath, build_dir = nil, options = {} )
 			
 	    defaultopts = { :enableassert => true }
@@ -134,12 +139,10 @@ module Jerbil
         $stderr << "could not load java vm: make sure JAVA_HOME is set correctly!\n"
         raise
       end
-     
-      #TODO: test javac main and raise if not found
     end
   
     # Tries to guess the JDK path if JAVA_HOME is not set (Windows only). 
-    def JavaHelper.guess_java_home     
+    def JavaHelper.guess_java_home # :nodoc:  
         if ENV['JAVA_HOME'].nil? && IS_WINDOWS
           begin
             require 'win32/registry'
@@ -203,13 +206,13 @@ module Jerbil
   ######################################################################
   # A JavaFileList is a specialisation of a standard Rake::FileList.
   # It includes additional methods to deal with build dirs, resources 
-  # and other java specifics.
+  # and other Java related things.
   class JavaFileList < Rake::FileList
     attr_reader :srcdir
     attr_reader :dstdir
     attr_accessor :resource_patterns
     
-    # srcdir:: the directory containing the Java source file. 
+    # srcdir:: the directory containing the Java source files. 
     # dstdir:: destination directory for class files (used by JavacTask).
     # extensions:: a list of extensions to treat as resources. The default is to treat
     # all files not ending in .java as resources.           
@@ -222,7 +225,7 @@ module Jerbil
       include(srcdir + "/**/*.java")
     end
     
-    # Returns a list of all java source files formatted as java class names.
+    # Returns a list of all java source files formatted as Java class names.
     # For example src/org/foo/Baz -> org.foo.Baz.
     def to_classnames
       # remove the initial directory and separator     
@@ -282,6 +285,7 @@ module Jerbil
       end      
     end        
     
+		# Returns a list of out-of-date files, based on timestamp comparison.
     def out_of_date
       return self.to_a unless (File.exists?(dstdir) and Dir.entries(dstdir).length > 2)      
       
@@ -325,7 +329,8 @@ module Jerbil
   #   JAVA_BUILD_DIR = "classes"
   #   JAVA_FILES = MultiJavaFileList.new(MODULES, JAVA_BUILD_DIR, SOURCE_DIR)
   #
-  # This will look for source files in +a/src+ and +b/src+, compiling into +classes+.
+  # This will look for source files in <em>a/src</em> and <em>b/src</em>,
+	# compiling into +classes+.
   class MultiJavaFileList
   
     attr_reader :modules, :dstdir
@@ -427,6 +432,7 @@ end
 JavaFileList = Jerbil::JavaFileList
 
 # make load_jvm available to toplevel
+# See JavaHelper.load_jvm.
 def load_jvm(args, build_dir, options={})
 	Jerbil::JavaHelper.load_jvm(args, build_dir, options)			
 end

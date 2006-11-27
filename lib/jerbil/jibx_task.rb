@@ -3,7 +3,7 @@ require 'rake/tasklib'
 require 'jerbil/java_helper'
 
 module Jerbil
-  # Compiles JIBX bindings.
+  # Compiles JIBX[http://jibx.sourceforge.net/] bindings.
   #
   # == Example
   #     Jerbil::JibxTask.new do |t|
@@ -23,7 +23,7 @@ module Jerbil
       define     
     end
     
-    def define	 
+    def define # :nodoc:	 
       task name => dependencies do |t|
         compiler = Rjb::import('org.jibx.binding.Compile').new
         compiler.setVerbose(verbose)
