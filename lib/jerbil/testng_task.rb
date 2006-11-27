@@ -23,24 +23,24 @@ module Jerbil
       
       attr_accessor :name
 			
-			# A JavaFileList specifing tests to run. TestNGTask will use
-			# +to_classes+ to obtain the class files from the list.
+      # A JavaFileList specifing tests to run. TestNGTask will use
+      # +to_classes+ to obtain the class files from the list.
       attr_accessor :tests
 			
-			# Where the testng output should go. Default "test-output".
+      # Where the testng output should go. Default "test-output".
       attr_accessor :outputdir
 			
-			# Whether to generate HTML reports. Defaults to +true+.
+      # Whether to generate HTML reports. Defaults to +true+.
       attr_accessor :report
 			
-			# A list of locations of testng suite.xml files.		
+      # A list of locations of testng suite.xml files.		
       attr_accessor :suites
 			
 			# Working dir to use during test execution.
       attr_accessor :workingdir
 			
-			# A list of test listeners to use. Defaults to DefaultTestListener 
-			# if empty.
+      # A list of test listeners to use. Defaults to DefaultTestListener 
+      # if empty.
 			attr_accessor :listeners					
       
       def initialize(name)
@@ -61,19 +61,16 @@ module Jerbil
 	  	desc "run testng tests" if Rake.application.last_comment.nil?
         task name => dependencies do |t|
           testng = Rjb::import('org.testng.TestNG').new_with_sig 'Z', false
-         
+     
           listeners << DefaultTestListener.new if listeners.empty?
     
-					sl = SuiteListener.new
-          
           #need to use _invoke because addListener has 3 different method signatures
           #using same name and return type
-          #testng.addListener(Rjb::bind(tl, 'org.testng.ITestListener'))
-					listeners.each do |tl|  
+          listeners.each do |tl|  
             testng._invoke('addListener', 'Lorg.testng.ITestListener;', Rjb::bind(tl, 'org.testng.ITestListener'))
           end
 					
-					#testng.addListener(Rjb::bind(sl, 'org.testng.ISuiteListener'))
+          sl = SuiteListener.new
           testng._invoke('addListener', 'Lorg.testng.ISuiteListener;', Rjb::bind(sl, 'org.testng.ISuiteListener'))
                 
           if report
@@ -98,13 +95,13 @@ module Jerbil
             Dir.chdir(workingdir) { testng.run }
           end
       
-					message = "some tests failed"
-					if listeners.first.kind_of?(DefaultTestListener)
-						message += ": #{listeners.first.failed_to_s}"
-					end
+          message = "some tests failed"
+          if listeners.first.kind_of?(DefaultTestListener)
+            message += ": #{listeners.first.failed_to_s}"
+          end
           raise message unless testng.getStatus == 0
         end
-        directory workingdir unless workingdir.nil?
+        directory workingdir if workingdir
         directory outputdir
       end
     end
@@ -113,6 +110,7 @@ module Jerbil
     class DefaultTestListener
       include JavaHelper
 
+        # A list of all classes with failed tests.
         attr_reader :failed_classes
         def initialize # :nodoc:
           @failed_classes = Set.new

@@ -8,9 +8,9 @@ module Jerbil
   module Hibernate 
     # Generates a SQL schema from EJB3/Hibernate-annotated classes using Hibernate's
     # SchemaExport tool. Typically Jerbil::AptTask is used to compile source files and
-		# gather a list of entities which then gets serialized to a YAML file.
-		# ExportSchemaTask then reads this file and uses Hibernate's schema exporter to 
-		# generate SQL
+    # gather a list of entities which then gets serialized to a YAML file.
+    # ExportSchemaTask then reads this file and uses Hibernate's schema exporter to 
+    # generate SQL
     #
     # == Example
     #   Jerbil::Hibernate::ExportSchemaTask.new(:export_schema) do |t|
@@ -22,22 +22,22 @@ module Jerbil
       
       attr_accessor :name
       
-			# SQL schema destination file (default: schema.sql)
+      # SQL schema destination file (default: schema.sql)
       attr_accessor :schemafile
 			
-			# A file containing a list of entities (<em>javax.persitence.Entity</em>),
-			# serialized as a list of strings (YAML format).
+      # A file containing a list of entities (<em>javax.persitence.Entity</em>),
+      # serialized as a list of strings (YAML format).
       attr_accessor :entities_yml
 			
-			# Classname implementing the db dialect, defaults to
-			# <em>org.hibernate.dialect.MySQL5Dialect</em>
+      # Classname implementing the db dialect, defaults to
+      # <em>org.hibernate.dialect.MySQL5Dialect</em>
       attr_accessor :dialect
 			
-			# SQL statements to be executed before generated sql.
+      # SQL statements to be executed before generated sql.
       attr_accessor :preamble
 			
-			# FQN of a package containing package-info.java to be used by
-			# hibernate.
+      # FQN of a package containing package-info.java to be used by
+      # hibernate.
       attr_accessor :package
       
       def initialize(name=:export_schema)
