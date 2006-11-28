@@ -101,3 +101,11 @@ Jerbil::Hibernate::ExportSchemaTask.new(:export_schema) do |t|
   t.schemafile = DB_SCHEMA
   t.entities_yml = ENTITIES_YML
 end
+
+Jerbil::Hibernate::ExportSchemaTask.new(:export_schema_filtered) do |t|
+  t.schemafile = DB_SCHEMA
+  t.entities_yml = ENTITIES_YML
+  t.filter { |classname| classname =~ /^merbil\./ }
+end
+
+

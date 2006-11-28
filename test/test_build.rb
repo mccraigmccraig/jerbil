@@ -74,8 +74,20 @@ class TestBuild < Test::Unit::TestCase
     run_rake_clean(:export_schema) do |ok,res|
       assert ok
       assert File.exists?(DB_SCHEMA)
+      #make sure file is not empty
+      assert File.size(DB_SCHEMA) >= 200
     end
   end
+  
+  def test_export_schema_filtered
+    run_rake_clean(:export_schema_filtered) do |ok,res|
+      assert ok
+      assert File.exists?(DB_SCHEMA)
+      #make sure file is empty
+      assert File.size(DB_SCHEMA) <= 150
+    end
+  end
+  
   
   def test_run_no_fork
     run_rake_clean(:run) do |ok,res|

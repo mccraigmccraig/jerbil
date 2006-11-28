@@ -44,6 +44,7 @@ module Jerbil
         @name = name
         @dependencies = []
         @package = nil
+        @classfilter = nil
         @schemafile = "schema.sql"
         @entities_yml = "entities.yml"
         @dialect = "org.hibernate.dialect.MySQL5Dialect"
@@ -59,8 +60,8 @@ module Jerbil
     
           raise 'no annotated entities found!' if entities.empty?
           
-          #puts "found #{entities.size} entities"
-          
+          #puts "found #{entities.size} entities"    
+          entities = entities.dup.select { |e| @classfilter.call(e) } if @classfilter         
           entity_classes = entities.map {|klass| Rjb::import(klass)}
           
           schemaexporter = SchemaExporter.new( entity_classes, schemafile, dialect, package )
@@ -82,7 +83,16 @@ module Jerbil
         end
         file schemafile => name
         task name => entities_yml
-      end  
+      end
+      
+      # Filters all entities. Useful to only export schema for a subset of classes.
+      # ==Example
+      # Jerbil::Hibernate::ExportSchemaTask.new(:export_schema) do |t|
+      #    t.filter { |classname| classname =~ /^foo/ }    
+      #  end
+      def filter(*args, &block)
+          @classfilter = block
+      end
     end
   
     # Turns the hibernate sql output into something readable. Only tested
