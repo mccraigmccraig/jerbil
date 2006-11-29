@@ -1,5 +1,7 @@
 package jerbil.example;
 
+import org.hibernate.annotations.Index;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -23,6 +25,7 @@ public class JerbilEntity {
         this.id = id;
     }
 
+    @Index( name = "name_idx" )
     public String getName() {
         return name;
     }
