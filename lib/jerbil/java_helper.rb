@@ -400,6 +400,10 @@ module Jerbil
     def gsub!( replace, replace_with )
       @java_files.each{ |f| f.gsub!( replace, replace_with ) }
     end
+    
+    def map!(&block)
+      @java_files.each { |f| f.map!{ |g| block.call(g) } }
+    end
   end
 end
 

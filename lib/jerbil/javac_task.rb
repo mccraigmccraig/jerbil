@@ -59,7 +59,7 @@ module Jerbil
           # due to known javac bug 6198196 -
           # http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6198196        
           if Jerbil::IS_WINDOWS
-            files.map! {|fn| fn.sub("/", "\\")}
+            files.map! {|fn| fn.gsub("/", "\\")}
           end
           
           parms += files 
