@@ -28,6 +28,10 @@ module Jerbil
       # A file containing a list of entities (<em>javax.persistence.Entity</em>),
       # serialized as a list of strings (YAML format).
       attr_accessor :entities_yml
+
+      # a file containing a map of properties, property names are keys in the map, and
+      # property values are values in the map
+      attr_accessor :properties_yml
 			
       # Classname implementing the db dialect, defaults to
       # <em>org.hibernate.dialect.MySQL5Dialect</em>
@@ -51,6 +55,7 @@ module Jerbil
         @prettyprint = true
         @schemafile = "schema.sql"
         @entities_yml = "entities.yml"
+        @properties_yml = nil
         @dialect = "org.hibernate.dialect.MySQL5Dialect"
                 
         yield self if block_given?
@@ -67,8 +72,10 @@ module Jerbil
           #puts "found #{entities.size} entities"    
           entities = entities.dup.select { |e| @classfilter.call(e) } if @classfilter         
           entity_classes = entities.map {|klass| Rjb::import(klass)}
-          
-          cfg = get_config(entity_classes, package)
+
+          properties = (YAML.load_file(@properties_yml) if @properties_yml) || {}
+
+          cfg = get_config(entity_classes, properties, package)
           sql = cfg.generateSchemaCreationScript(Rjb::import(dialect).new)
           
           schema =  "# -- do not edit ---\n"
@@ -99,7 +106,7 @@ module Jerbil
       end
         
       protected
-      def get_config(classes, package=nil)
+      def get_config(classes, properties, package=nil)
         anncfg = Rjb::import('org.hibernate.cfg.AnnotationConfiguration')
         acfg = anncfg.new
         packages = Set.new
@@ -113,6 +120,10 @@ module Jerbil
         packages << package if package
         packages.each { |pkg| acfg.addPackage(pkg) }
                 
+        properties.each do |key,value|
+          acfg.setProperty(key, value)
+        end
+        
         acfg
       end
       
