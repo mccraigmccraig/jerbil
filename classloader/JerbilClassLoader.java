@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.net.URL;
+import java.net.MalformedURLException;
 
 /**
  * <p>A classloader which is used by the jerbil build system to dynamically
@@ -36,6 +38,29 @@ public class JerbilClassLoader extends ClassLoader {
                 0, classBytes.length );
     }
 
+	public URL findResource(String name) {
+        debug("findResource(" + name + ")");
+		URL url = null;
+		File f = null;
+		for (String root : roots) {
+			File aFile = new File(root, name);
+            if ( aFile.exists()) {
+                f = aFile;
+                debug("resolved to " + aFile.toString());
+                break;
+            }
+        }
+		if ( f!= null ) {
+			try {
+				url = f.toURI().toURL();	
+			} catch (MalformedURLException e) {
+				// ignore
+			}
+		}
+		return url;
+	}
+
+	/*
     public InputStream getResourceAsStream(String name) {
         debug("getResourceAsStream(" + name + ")");
 
@@ -52,11 +77,12 @@ public class JerbilClassLoader extends ClassLoader {
         if (f != null) {
             try {
                 return new ByteArrayInputStream(readBytes(new FileInputStream(f)));
-            } catch (Exception e) {/*falltrough*/}
+            } catch (Exception e) {}
         }
 
         return super.getResourceAsStream(name);
     }
+	*/
 
     private byte[] findClassBytes(String className) throws ClassNotFoundException {
         InputStream in = null;
