@@ -132,7 +132,7 @@ module Jerbil
       puts jvmargs if ENV['JERBIL_DEBUG']
            
       begin
-        Rjb::load(classpath.to_cp, jvmargs)
+        Rjb::load(classpath.to_cp, jvmargs.flatten)
       rescue  
         $stderr << "could not load java vm: make sure JAVA_HOME is set correctly!\n"
         raise
