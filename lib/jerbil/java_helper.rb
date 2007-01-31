@@ -126,7 +126,7 @@ module Jerbil
         $stderr << "jerbil: build_dir not set: dynamic classloading is disabled\n" if Rake.application.options.trace
       end
            
-      java_opts = ENV['JAVA_OPTS'] || options[:java_opts]
+      java_opts = ENV['JAVA_OPTS'].split || options[:java_opts]
       jvmargs.unshift(java_opts) if java_opts
       
       puts jvmargs if ENV['JERBIL_DEBUG']
