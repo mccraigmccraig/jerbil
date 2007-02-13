@@ -84,7 +84,9 @@ module Jerbil
 		#
     def JavaHelper.load_jvm(classpath, build_dir = nil, options = {} )
 			
-	    defaultopts = { :enableassert => true }
+	  $jerbil_debug = ENV['JERBIL_DEBUG']
+
+	  defaultopts = { :enableassert => true }
       options = defaultopts.merge(options.dup)
 	  
       #need verbose java exceptions
@@ -95,10 +97,10 @@ module Jerbil
       
       puts "using JDK in #{java_home}" if Rake.application.options.trace
       
-      #include tools.jar from JDK (needed for javac etc.)
-      classpath.unshift(File.join(java_home, "lib", "tools.jar")) if java_home    
       #include custom classloader
       classpath.unshift(File.join(File.dirname(__FILE__), "../../classloader")) if build_dir
+      #include tools.jar from JDK (needed for javac etc.)
+      classpath.unshift(File.join(java_home, "lib", "tools.jar")) if java_home    
       
       jvmargs = []    
       jvmargs << "-ea" if options[:enableassert]
@@ -118,9 +120,9 @@ module Jerbil
       end
          
       if build_dir
-        jerbil_debug = ENV['JERBIL_DEBUG'] ? 'true' : 'false'
+        jerbil_debug = $jerbil_debug ? 'true' : 'false'
         
-        jvmargs += [ "-Djava.system.class.loader=JerbilClassLoader", 
+        jvmargs += [  "-Djava.system.class.loader=JerbilClassLoader",
           "-Djerbil.build.root=#{build_dir.to_a.join(':')}", "-Djerbil.debug=#{jerbil_debug}" ] 
       else      
         $stderr << "jerbil: build_dir not set: dynamic classloading is disabled\n" if Rake.application.options.trace
@@ -129,9 +131,9 @@ module Jerbil
       java_opts = (ENV['JAVA_OPTS'].split if ENV['JAVA_OPTS']) || options[:java_opts]
       jvmargs.unshift(java_opts) if java_opts
       
-			if ENV['JERBIL_DEBUG']
-      	puts "jvmargs   : #{jvmargs.inspect}"
-				puts "initial cp: #{classpath.to_cp}"
+			if $jerbil_debug
+      	$stderr << "jvmargs   : #{jvmargs.inspect}\n"
+				$stderr << "initial cp: #{classpath.to_cp}\n"
 		  end
            
       begin

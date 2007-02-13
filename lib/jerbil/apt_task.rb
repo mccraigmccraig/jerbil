@@ -98,6 +98,8 @@ module Jerbil
     def compile(parameters, printwriter)
       apt = Rjb::import('com.sun.tools.apt.Main')
       parameters << "-nocompile" if nocompile
+
+	  $stderr << "apt parameters: #{parameters.inspect}\n" if $jerbil_debug
       apt.process(get_processor_factory, printwriter, parameters )
     end
     
