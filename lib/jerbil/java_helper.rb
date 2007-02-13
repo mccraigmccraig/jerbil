@@ -96,9 +96,9 @@ module Jerbil
       puts "using JDK in #{java_home}" if Rake.application.options.trace
       
       #include tools.jar from JDK (needed for javac etc.)
-      classpath.include(File.join(java_home, "lib", "tools.jar")) if java_home    
+      classpath.unshift(File.join(java_home, "lib", "tools.jar")) if java_home    
       #include custom classloader
-      classpath.include(File.join(File.dirname(__FILE__), "../../classloader")) if build_dir
+      classpath.unshift(File.join(File.dirname(__FILE__), "../../classloader")) if build_dir
       
       jvmargs = []    
       jvmargs << "-ea" if options[:enableassert]
@@ -129,7 +129,10 @@ module Jerbil
       java_opts = (ENV['JAVA_OPTS'].split if ENV['JAVA_OPTS']) || options[:java_opts]
       jvmargs.unshift(java_opts) if java_opts
       
-      puts jvmargs if ENV['JERBIL_DEBUG']
+			if ENV['JERBIL_DEBUG']
+      	puts "jvmargs   : #{jvmargs.inspect}"
+				puts "initial cp: #{classpath.to_cp}"
+		  end
            
       begin
         Rjb::load(classpath.to_cp, jvmargs.flatten)
