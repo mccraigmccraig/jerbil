@@ -88,6 +88,21 @@ class TestBuild < Test::Unit::TestCase
     end
   end
   
+  def test_validate_schema_success
+    run_rake_clean(:validate_schema_success) do |ok,res|
+      assert ok    
+      assert File.exists?(DB_SCHEMA)
+      #make sure file is not empty
+      assert File.size(DB_SCHEMA) >= 200
+    end
+  end
+  
+  def test_validate_schema_failure
+    run_rake_clean(:validate_schema_failure) do |ok,res|
+      assert !ok     
+    end
+  end
+  
   
   def test_run_no_fork
     run_rake_clean(:run) do |ok,res|

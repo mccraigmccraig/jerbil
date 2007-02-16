@@ -9,14 +9,16 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * A basic ejb3 entity for testing purposes.
+ * A basic ejb3 entity for schema validation testing purposes.
+ * 
  */
 @Entity
-@Table(name = "jerbil_entities")
-public class JerbilEntity {
+// invalid table name: not active record standard
+@Table(name = "EntityWithValidationErrors")
+public class EntityWithValidationErrors {
 
     private Long id;
-    private String name, lastName;
+    private String lastName;
 
 		private boolean primary;
 
@@ -29,17 +31,9 @@ public class JerbilEntity {
         this.id = id;
     }
 
-    @Index( name = "name_idx" )
-    public String getName() {
-        return name;
-    }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-		// not activerecord conformant, but reserved
-		@Column(name = "is_primary" )
+		// invalid column name: reserved keyword in mysql5
+		@Column(name = "primary" )
 		public boolean isPrimary() {
 			return primary;
 		}
@@ -48,7 +42,9 @@ public class JerbilEntity {
 			primary = b;
 		}
 
-		@Column(name = "last_name")
+
+		// invalid column name: should be 'last_name'
+		@Column(name = "my_freaky_name")
 		public String getLastName() {
 			return lastName;
 		}
@@ -56,4 +52,5 @@ public class JerbilEntity {
 		public void setLastName(String n) {
 			this.lastName = n;
 		}
+
 }

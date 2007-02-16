@@ -1,6 +1,7 @@
 require 'rake'
 require 'rake/tasklib'
 require 'jerbil/java_helper'
+require 'jerbil/inflector'
 require 'yaml'
 require 'set'
 
@@ -10,12 +11,15 @@ module Jerbil
     # SchemaExport tool. Typically Jerbil::AptTask is used to compile source files and
     # gather a list of entities which then gets serialized to a YAML file.
     # ExportSchemaTask then reads this file and uses Hibernate's schema exporting 
-    # features to generate SQL
+    # features to generate SQL. Optionally the schema can be validated, to check 
+    # whether any column or table names are reserved keywords (validate :sql) or
+    # conform to ActiveRecord convention (validate :rails).
     #
     # == Example
     #   Jerbil::Hibernate::ExportSchemaTask.new(:export_schema) do |t|
     #       t.schemafile = "schema.sql"
-    #       t.entities_yml = ENTITIES_YML      
+    #       t.entities_yml = ENTITIES_YML   
+    #       t.validate = :all
     #   end
     class ExportSchemaTask < Rake::TaskLib
       include JavaHelper
@@ -46,21 +50,23 @@ module Jerbil
       attr_accessor :package
       
       # Pretty printing of generated SQL (default: true)
-      attr_accessor :prettyprint
+      attr_accessor :prettyprint            
       
       def initialize(name=:export_schema)
         @name = name
         @dependencies = []
         @classfilter = nil
         @prettyprint = true
+        @validate = []
         @schemafile = "schema.sql"
         @entities_yml = "entities.yml"
         @properties_yml = nil
         @dialect = "org.hibernate.dialect.MySQL5Dialect"
+        @sql_reserved = nil
                 
         yield self if block_given?
         define
-      end
+      end           
       
       def define # :nodoc:
         task name => dependencies do |t|       
@@ -76,6 +82,8 @@ module Jerbil
           properties = (YAML.load_file(@properties_yml) if @properties_yml) || {}
 
           cfg = get_config(entity_classes, properties, package)
+          
+          validate_config(cfg) unless validate.empty?
           sql = cfg.generateSchemaCreationScript(Rjb::import(dialect).new)
           
           schema =  "# -- do not edit ---\n"
@@ -104,6 +112,16 @@ module Jerbil
       def filter(*args, &block)
           @classfilter = block
       end
+      
+      # Validate configuration (options: :all, :sql, :rails)
+      def validate(*what)
+        @validate.concat(what)
+      end
+      
+      # Exposes the inflections instance so exceptions can be registered.
+      def inflections
+        yield Inflector::Inflections.instance if block_given?
+      end
         
       protected
       def get_config(classes, properties, package=nil)
@@ -129,8 +147,100 @@ module Jerbil
       
       def format(sql)
         Rjb::import('org.hibernate.pretty.DDLFormatter').new(sql).format      
+      end       
+
+      def reserved_words
+        if @sql_reserved.nil?
+          @sql_reserved = {}          
+          Dir[File.join(File.dirname(__FILE__), "..", "..", "sql_reserved_words", "**")].each do |file|
+            @sql_reserved[File.basename(file)] = File.readlines(file).map{|s|s.chomp}
+          end
+        end
+        @sql_reserved
       end
-    end
-  end
+
+      def check_reserved_word(word)
+        offending_dialects = []
+	      reserved_words.each do |dialect, wordlist|
+		      offending_dialects << dialect.to_s if wordlist.include?(word.upcase)	
+        end
+	      offending_dialects
+      end
+
+      def validate?(what)
+        @validate.include?(:all) || @validate.include?(what)
+      end
+      
+      def validate_config(cfg)
+        cfg.buildMappings
+        class_mappings = cfg.getClassMappings
+
+        invalid_tables  = []
+        invalid_columns = []
+        invalid_words   = []
+               
+        while class_mappings.hasNext         
+          cmap = class_mappings.next
+        
+          simple_name = cmap.getMappedClass.getSimpleName
+          table_name  = cmap.getTable.getName                 
+            
+          #only check table semantics for toplevel classes
+          if cmap.getRootClass.equals(cmap)                               
+            if validate?(:sql)
+              dialect_probs = check_reserved_word(table_name)        
+              unless dialect_probs.empty?
+                $stderr << "[#{simple_name}] table name '#{table_name}' is a reserved keyword in dialects: #{dialect_probs.join(', ')}\n" if verbose
+                invalid_words << table_name
+              end
+            end
+        
+            if validate?(:rails)
+              expected_table_name = Inflector::tableize(simple_name).sub(/^hibernate_/, '')
+              if expected_table_name != table_name && check_reserved_word(expected_table_name).empty?
+                $stderr << "[#{simple_name}] invalid table: '#{table_name}', should be '#{expected_table_name}'\n" if verbose
+                invalid_tables << table_name
+              end
+            end
+          end
+        
+          # column checks
+          property_it = cmap.getPropertyIterator
+          while property_it.hasNext
+            prop = property_it.next
+            prop_name = prop.getName
+        
+            column_it = prop.getColumnIterator
+            next unless column_it.hasNext
+        
+            col_name = column_it.next.getName
+        
+            if validate?(:sql)
+              dialect_probs = check_reserved_word(col_name)
+              unless dialect_probs.empty?
+                $stderr << "[#{simple_name}] column name '#{col_name}' in '#{table_name}' is a reserved keyword in dialects: #{dialect_probs.join(', ')}\n" if verbose
+                invalid_words << col_name
+              end
+            end
+        
+            #ignore association types for now (TODO)
+            next if prop.getType.isAssociationType
+        
+            if validate?(:rails)
+              expected_col_name = Inflector::underscore(prop_name)
+          
+              if expected_col_name != col_name && check_reserved_word(expected_col_name).empty?
+                $stderr << "[#{simple_name}] invalid column: '#{table_name}.#{col_name}', should be '#{expected_col_name}'\n" if verbose
+                invalid_columns << col_name
+              end
+            end
+          end
+        end
+                
+        raise "ExportSchemaTask: validation errors, not exporting" if !invalid_tables.empty? || !invalid_columns.empty? || !invalid_words.empty?
+      end #validate config
+      
+    end #export schema task
+  end # Hibernate
 end
 

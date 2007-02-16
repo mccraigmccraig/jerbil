@@ -102,6 +102,25 @@ Jerbil::Hibernate::ExportSchemaTask.new(:export_schema) do |t|
   t.entities_yml = ENTITIES_YML
 end
 
+desc "validate schema success"
+Jerbil::Hibernate::ExportSchemaTask.new(:validate_schema_success) do |t|
+  t.schemafile = DB_SCHEMA
+  t.entities_yml = ENTITIES_YML
+	t.validate :all
+  t.filter { |classname| classname =~ /^jerbil\.example\.JerbilEntity/ }
+  
+  # not used, just for testing
+  t.inflections { |inflect| inflect.irregular( 'data' , 'data') }
+end
+
+desc "validate schema failure"
+Jerbil::Hibernate::ExportSchemaTask.new(:validate_schema_failure) do |t|
+  t.schemafile = DB_SCHEMA
+  t.entities_yml = ENTITIES_YML
+	t.validate :all
+  t.filter { |classname| classname =~ /^jerbil\.example\.EntityWithValidationErrors/ } 
+end
+
 Jerbil::Hibernate::ExportSchemaTask.new(:export_schema_filtered) do |t|
   t.schemafile = DB_SCHEMA
   t.entities_yml = ENTITIES_YML

@@ -6,7 +6,7 @@ require 'rake/clean'
 
 CLEAN.include('pkg')
 
-FILES     = FileList['lib/**/*', 'test/*.rb', 'classloader/*', 'LICENSE', 'TODO', 'CHANGES', 'README']
+FILES     = FileList['lib/**/*', 'test/*.rb', 'classloader/*', 'sql_reserved_words/*', 'LICENSE', 'TODO', 'CHANGES', 'README']
 FULLFILES = FILES.clone.include('buildsupport/**/*', 'example/**/*' )
 TESTFILES = FileList['test/test_java_helper.rb']
 FULLTESTFILES = TESTFILES.clone.include('test/test_build.rb')

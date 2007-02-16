@@ -43,7 +43,7 @@ module Jerbil
         File.join(File.dirname(__FILE__), "..", "example", "build"))
       
       classnames = flist.to_classnames
-      assert_equal 5, classnames.length, classnames
+      assert_equal 6, classnames.length, classnames
       assert_equal 1, flist.resources.length, flist.resources
           
       assert_equal ['jerbil.example.JerbilEntity', 
