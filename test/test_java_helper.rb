@@ -46,7 +46,9 @@ module Jerbil
       assert_equal 6, classnames.length, classnames
       assert_equal 1, flist.resources.length, flist.resources
           
-      assert_equal ['jerbil.example.JerbilEntity', 
+      assert_equal [
+				'jerbil.example.EntityWithValidationErrors',
+				'jerbil.example.JerbilEntity', 
         'jerbil.example.Jerbiliser',
         'jerbil.example.Main',
         'jerbil.example.Main2',
