@@ -65,7 +65,26 @@ module Jerbil
       end 
       byteoos.toByteArray
     end
-    
+
+    # do a block, with a given value of a java system property set...
+    # sets up the value of the system property before calling the supplied
+    # block, then restores the
+    def with_system_property( property_name,  property_value, &a_proc )
+        if property_name
+            system_class = Rjb::import( 'java.lang.System' )
+            property_value_save = system_class.getProperty( property_name )
+            begin
+                system_class.setProperty( property_name , property_value )
+                a_proc.call
+            rescue Exception
+                system_class.setProperty( property_name , property_value_save )
+            end
+        else
+            a_proc.call
+        end
+    end
+
+
     # Loads the java virtual machine. This method should only be invoked once, typically
     # before task definitions in a Rakefile. If the environment variable +JAVA_OPTS+ is
     # set, it will be treated as extra parameter for the initial VM load.
