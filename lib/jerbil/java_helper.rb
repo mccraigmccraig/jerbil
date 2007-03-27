@@ -76,8 +76,12 @@ module Jerbil
             begin
                 system_class.setProperty( property_name , property_value )
                 a_proc.call
-            rescue Exception
-                system_class.setProperty( property_name , property_value_save )
+            ensure
+                if property_value_save
+                    system_class.setProperty( property_name , property_value_save )
+                else
+                    system_class.clearProperty( property_name )
+                end
             end
         else
             a_proc.call
