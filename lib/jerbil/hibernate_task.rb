@@ -57,7 +57,7 @@ module Jerbil
 
       # value of java system property to set when exporting schema
       attr_accessor :system_property_value
-      
+
       def initialize(name=:export_schema)
         @name = name
         @dependencies = []
@@ -71,7 +71,7 @@ module Jerbil
         @sql_reserved = nil
         @system_property_name = nil
         @system_property_value = nil
-
+        @ddlfilter = nil
                 
         yield self if block_given?
         define
@@ -107,6 +107,8 @@ module Jerbil
 
                 schema << "\n\n#{epilogue}" if epilogue
 
+                schema = @ddlfilter.call( schema ) if @ddlfilter
+
                 File.open(schemafile, "w") {|file| file << schema }
             end
         end
@@ -121,6 +123,11 @@ module Jerbil
       #  end
       def filter(*args, &block)
           @classfilter = block
+      end
+
+      # filters output sql using the provided block, which takes a single parameter
+      def ddlfilter(*args, &block)
+          @ddlfilter = block
       end
       
       # Validate configuration (options: :all, :sql, :rails)
