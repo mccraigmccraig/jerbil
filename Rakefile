@@ -11,7 +11,7 @@ FULLFILES = FILES.clone.include('buildsupport/**/*', 'example/**/*' )
 TESTFILES = FileList['test/test_java_helper.rb']
 FULLTESTFILES = TESTFILES.clone.include('test/test_build.rb')
 
-JERBIL_VERSION   = "0.1"
+JERBIL_VERSION   = "0.2"
 
 task :default => :repackage 
 

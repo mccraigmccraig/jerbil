@@ -235,17 +235,21 @@ module Jerbil
   # and other Java related things.
   class JavaFileList < Rake::FileList
     attr_reader :srcdir
+    attr_reader :resdir
     attr_reader :dstdir
     attr_accessor :resource_patterns
     
+    
     # srcdir:: the directory containing the Java source files. 
     # dstdir:: destination directory for class files (used by JavacTask).
+    # resdir:: an additional directory containing resources (to be copied to destdir after compile, defaults to srcdir)
     # extensions:: a list of extensions to treat as resources. The default is to treat
     # all files not ending in .java as resources.           
-    def initialize(srcdir, dstdir, extensions = nil)
+    def initialize(srcdir, dstdir, resdir = srcdir, extensions = nil)
       super([])
       @srcdir = srcdir
       @dstdir = dstdir
+      @resdir = resdir
       @resource_patterns = []     
       add_extensions(extensions)
       include(srcdir + "/**/*.java")
@@ -279,27 +283,31 @@ module Jerbil
       srcdir
     end
     
-    # Returns a Rake::FileList containing all resources found in +srcdir+.
+    # Returns a map containing all resources found in +resdir+ with their value 
+    # pointing to the destination file.
     # Resources are typically files in +srcdir+ with extensions other than .java 
-    # (properties, xml, ...). If you want to copy specfic resources register 
+    # (properties, xml, ...). If you want to copy only specfic resources register 
     # extensions using #add_extension.
     def resources
-      r = FileList.new
+      res_list = FileList.new
       if resource_patterns.empty? 
-        r.include(srcdir + "/**/*.*")    
-        r.exclude(srcdir + "/**/*.java")     
+        res_list.include(resdir + "/**/*.*")    
       else     
-        resource_patterns.each { |p| r.include(srcdir+p) }
+        resource_patterns.each { |p| res_list.include(resdir+p) }
       end
-      r
+      res_list.exclude(resdir + "/**/*.java")      
+      res_map = {}
+      res_list.each do |r|
+        res_map[r] = r.pathmap("%{^#{resdir_quoted},#{dstdir}}p")
+      end
+      res_map
     end 
     
     # Calls block once for each resource found in +srcdir+, passing
     # the source and destination file as parameter.
     def resource_and_target # :yields: resource,target   
-      resources.each do | r |
-        target =  r.sub(/#{srcdir_quoted}/, dstdir)
-        yield r, target if block_given?
+      resources.each do |r,t|
+        yield r, t if block_given?
       end
     end
     
@@ -343,6 +351,10 @@ module Jerbil
     def srcdir_quoted
       Regexp.quote(srcdir)
     end
+    
+    def resdir_quoted
+      Regexp.quote(resdir)
+    end
   end
   
   ######################################################################
@@ -367,7 +379,7 @@ module Jerbil
       @dstdir = dstdir
       modules.each do | m |
         srcdir = File.join(m, srcprefix)
-        @java_files << JavaFileList.new(srcdir, dstdir, copypat )
+        @java_files << JavaFileList.new(srcdir, dstdir, srcdir, copypat )
       end
     end
     
@@ -392,9 +404,9 @@ module Jerbil
     end  
     
     def resources
-      res = []
+      res = {}
       @java_files.each do |f|
-        res += f.resources  
+        res.update!(f.resources)
       end
       res
     end

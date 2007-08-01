@@ -19,6 +19,14 @@ Jerbil::JavacTask.new(:compile) do |t|
   t.target = "1.5" 
 end
 
+desc "compile all java files with separate resources"
+Jerbil::JavacTask.new(:compile_with_separate_resources) do |t|
+  t.java_files = JAVA_FILES_WITH_RESOURCES
+  t.options :nowarn, :debug
+  t.source = "1.5"
+  t.target = "1.5" 
+end
+
 desc "compile all tests"
 Jerbil::JavacTask.new(:test_compile) do |t|
   t.java_files = JAVA_TEST_FILES
