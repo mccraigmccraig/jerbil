@@ -1,11 +1,12 @@
 #!/usr/bin/env ruby
 
 $:.unshift File.join( File.dirname(__FILE__), "..", "lib" )
+$:.unshift File.join( File.dirname(__FILE__), "..", "example" )
 
 require 'jerbil/java_helper'
 require 'test/unit'
 require 'yaml'
-require 'example/buildconfig'
+require 'buildconfig'
 
 class TestBuild < Test::Unit::TestCase
   def test_compile
@@ -170,6 +171,10 @@ class TestBuild < Test::Unit::TestCase
     run_rake(:clean, :test_java_task)
   end
   
+  def test_dmg_task
+    run_rake(:clean, :dmg)
+  end
+  
   private
   def assert_files_exist(files)
     files.each {|f| assert File.exists?(f)}
@@ -187,7 +192,7 @@ class TestBuild < Test::Unit::TestCase
   end
   
   def run_rake(*args, &block)
-    Dir.chdir("example") do
+    Dir.chdir(File.join(File.dirname(__FILE__), "..", "example")) do
       #sh "rake --quiet #{args.join(' ')}" do |ok,res|
       cmd = args.join(" ")
       #on windows, exec invokes a subshell which does not inherit environment variables,

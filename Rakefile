@@ -11,7 +11,7 @@ FULLFILES = FILES.clone.include('buildsupport/**/*', 'example/**/*' )
 TESTFILES = FileList['test/test_java_helper.rb']
 FULLTESTFILES = TESTFILES.clone.include('test/test_build.rb')
 
-JERBIL_VERSION   = "0.2"
+JERBIL_VERSION   = "0.3"
 
 task :default => :repackage 
 
@@ -24,7 +24,7 @@ spec = Gem::Specification.new do |s|
   s.name = 'jerbil'
   s.homepage = 'http://code.trampolinesystems.com/jerbil'
   s.version = JERBIL_VERSION
-  s.add_dependency('rjb', '>= 1.0')
+  s.add_dependency('rjb', '>= 1.0.6')
   s.add_dependency('rake', '>= 0.7.1')
   s.add_dependency('builder')
   s.require_path = 'lib'

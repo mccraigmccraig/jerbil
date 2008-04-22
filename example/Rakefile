@@ -135,4 +135,9 @@ Jerbil::Hibernate::ExportSchemaTask.new(:export_schema_filtered) do |t|
   t.filter { |classname| classname =~ /^merbil\./ }
 end
 
-
+Jerbil::DmgTask.new do |t|
+  t.dmgfile = File.join(DIST_DIR, "test.dmg")
+  t.appname = "test"
+  t.mainclass = "jerbil.example.Main"
+  t.classpath = FileList["./lib/*.jar" ]
+end
