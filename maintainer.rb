@@ -14,7 +14,7 @@ namespace :maintainer do
 	task :copy_gem => :repackage
 	
 	task :update_gem_index do |t|
-		sh "ssh trampolinesystems.com index_gem_repository.rb -d #{WWWROOT}"
+		sh "ssh trampolinesystems.com gem generate_index -d #{WWWROOT}"
 	end
 	
 	task :publish_gem => [:copy_gem, :update_gem_index]
