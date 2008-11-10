@@ -9,6 +9,8 @@ CLEAN.include(BUILD_DIR, DIST_DIR,TESTOUTPUTDIR)
 
 load_jvm(CLASSPATH, JAVA_BUILD_DIR)
 
+Jerbil::DependencyTask.load
+
 task :default => :compile
 
 desc "compile all java files"
