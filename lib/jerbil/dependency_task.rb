@@ -1,5 +1,6 @@
 require 'rake'
 require 'rake/tasklib'
+require 'yaml'
 
 # Simple dependency management - fetch sources from svn / cvs / etc.
 module Jerbil
