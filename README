@@ -92,10 +92,8 @@ or
   
 == Example
 
-See the example/[http://svn.trampolinesystems.com/jerbil/trunk/example] subdirectory
+See the example/[http://github.com/jberkel/jerbil/tree/master/example] subdirectory
 in the repository.
-
-  % svn co http://svn.trampolinesystems.com/jerbil/trunk/example
 
 == Advantages over Ant
 
@@ -123,12 +121,9 @@ subsequently run tasks. This shouldn't be a problem in most cases though.
 
 == Related projects
 
+* buildr[http://incubator.apache.org/buildr/]
 * Raven[http://raven.rubyforge.org/]: similar to Jerbil in scope, but different approach (invokes 
   javac externally, no Java-Ruby integration).
- 
-== FAQ
-
-See FAQ[http://code.trampolinesystems.com/jerbil/wiki/FAQ].
 
 == Project homepage
 
