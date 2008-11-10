@@ -1,0 +1,10 @@
+quartz:
+    svn:        http://svn.opensymphony.com/svn/quartz/tags/quartz_1-6-0
+    tag:        quartz_1-6-0
+jruby-extras:
+    svn:        svn://rubyforge.org/var/svn/jruby-extras/trunk
+jruby:
+    svn:        http://svn.codehaus.org/jruby/tags/jruby-1_1_5
+    tag:        jruby_1_1_5
+    destdir:    jruby-src
+    buildcmd:   ant jar-complete
